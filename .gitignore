@@ -38,6 +38,7 @@ yarn-error.log*
 
 # claude code
 .claude/
+.claude.json
 
 # supabase migrations
 supabase_migrations/
