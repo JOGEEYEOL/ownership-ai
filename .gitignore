@@ -36,6 +36,21 @@ yarn-error.log*
 # vercel
 .vercel
 
+# claude code
+.claude/
+
+# supabase migrations
+supabase_migrations/
+
+# planning & documentation (except README)
+EXECUTION.md
+PRD-instruction.md
+PRD.md
+PRD_monetization_flexible.md
+PUBLIC_API_GUIDES.md
+execution_plan.md
+docs/RLS_SETUP_GUIDE.md
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
