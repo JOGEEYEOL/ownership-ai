@@ -54,8 +54,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     // 3. 비밀번호 재설정 이메일 발송
+    const origin =
+      request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     const { error: resetError } = await supabaseAdmin.auth.resetPasswordForEmail(user.email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password`,
+      redirectTo: `${origin}/auth/callback`,
     });
 
     if (resetError) {

@@ -68,11 +68,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     // 4. 인증 이메일 재발송 (Supabase에서는 resend 사용)
+    const origin =
+      request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     const { error: resendError } = await supabaseAdmin.auth.resend({
       type: 'signup',
       email: user.email,
       options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+        emailRedirectTo: `${origin}/auth/callback`,
       },
     });
 
