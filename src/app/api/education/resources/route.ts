@@ -122,6 +122,7 @@ export async function POST(request: NextRequest) {
       .insert({
         title: validated.title,
         description: validated.description,
+        type: validated.type,
         categoryId: validated.categoryId,
         fileUrl: validated.fileUrl,
         fileName: validated.fileName,

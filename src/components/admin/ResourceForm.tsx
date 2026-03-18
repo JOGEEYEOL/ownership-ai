@@ -49,6 +49,9 @@ interface ResourceCategory {
 const resourceFormSchema = z.object({
   title: z.string().min(1, { message: '제목을 입력해주세요' }),
   description: z.string().optional(),
+  type: z.enum(['template', 'checklist', 'document'], {
+    message: '자료 유형을 선택해주세요',
+  }),
   categoryId: z.string().min(1, { message: '카테고리를 선택해주세요' }),
   fileUrl: z.string().min(1, { message: '파일을 업로드하거나 URL을 입력해주세요' }),
   fileName: z.string().min(1, { message: '파일명을 입력해주세요' }),
@@ -141,6 +144,7 @@ export function ResourceForm({ mode, resource }: ResourceFormProps) {
         ? {
             title: resource.title,
             description: resource.description || '',
+            type: resource.type as 'template' | 'checklist' | 'document',
             categoryId: resource.categoryId || '',
             fileUrl: resource.fileUrl,
             fileName: resource.fileName,
@@ -297,6 +301,7 @@ export function ResourceForm({ mode, resource }: ResourceFormProps) {
       const fileSizeNum = data.fileSize ? parseInt(data.fileSize, 10) : null;
       const payload: Record<string, unknown> = {
         title: data.title,
+        type: data.type,
         categoryId: data.categoryId,
         fileUrl: data.fileUrl,
         fileName: data.fileName,
@@ -323,7 +328,7 @@ export function ResourceForm({ mode, resource }: ResourceFormProps) {
 
       if (!result.success) {
         // Zod validation 에러일 경우 상세 메시지 표시
-        const errorMsg = result.error?.details
+        const errorMsg = Array.isArray(result.error?.details)
           ? result.error.details
               .map((d: { path: string[]; message: string }) => `${d.path.join('.')}: ${d.message}`)
               .join(', ')
@@ -474,6 +479,29 @@ export function ResourceForm({ mode, resource }: ResourceFormProps) {
               rows={3}
               className="mt-1"
             />
+          </div>
+
+          {/* Type */}
+          <div>
+            <Label htmlFor="type">자료 유형 *</Label>
+            <Select
+              value={watch('type') || undefined}
+              onValueChange={value =>
+                setValue('type', value as 'template' | 'checklist' | 'document', {
+                  shouldValidate: true,
+                })
+              }
+            >
+              <SelectTrigger className="mt-1">
+                <SelectValue placeholder="자료 유형을 선택하세요" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="template">템플릿</SelectItem>
+                <SelectItem value="checklist">체크리스트</SelectItem>
+                <SelectItem value="document">문서</SelectItem>
+              </SelectContent>
+            </Select>
+            {errors.type && <p className="text-sm text-red-600 mt-1">{errors.type.message}</p>}
           </div>
 
           {/* Category */}

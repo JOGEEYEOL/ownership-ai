@@ -253,6 +253,11 @@ export const createResourceSchema = z.object({
   title: z.string().min(1, '제목은 필수입니다').max(200, '제목은 200자 이하여야 합니다'),
   description: z.string().max(1000, '설명은 1000자 이하여야 합니다').nullable().optional(),
 
+  // 자료 타입 (필수)
+  type: z.enum(['template', 'checklist', 'document'], {
+    message: '자료 유형을 선택해주세요',
+  }),
+
   // 카테고리 연결 (필수)
   categoryId: z.string().min(1, '카테고리를 선택해주세요'),
 
@@ -272,6 +277,7 @@ export const createResourceSchema = z.object({
 export const updateResourceSchema = z.object({
   title: z.string().min(1).max(200).optional(),
   description: z.string().max(1000).optional(),
+  type: z.enum(['template', 'checklist', 'document']).optional(),
   fileUrl: z.string().url().optional(),
   fileName: z.string().min(1).optional(),
   fileSize: z.number().int().positive().optional(),

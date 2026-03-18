@@ -61,6 +61,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const updateData: Record<string, unknown> = {};
     if (validated.title !== undefined) updateData.title = validated.title;
     if (validated.description !== undefined) updateData.description = validated.description;
+    if (validated.type !== undefined) updateData.type = validated.type;
     if (validated.categoryId !== undefined) updateData.categoryId = validated.categoryId;
     if (validated.fileUrl !== undefined) updateData.fileUrl = validated.fileUrl;
     if (validated.fileName !== undefined) updateData.fileName = validated.fileName;
