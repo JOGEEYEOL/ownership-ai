@@ -24,7 +24,7 @@ interface Resource {
   id: string;
   title: string;
   description: string | null;
-  type: string;
+  typeId: string | null;
   fileUrl: string;
   fileName: string;
   fileSize: number | null;
@@ -43,15 +43,18 @@ interface ResourceCategory {
   name: string;
 }
 
+interface ResourceType {
+  id: string;
+  name: string;
+}
+
 /**
  * Form Schema
  */
 const resourceFormSchema = z.object({
   title: z.string().min(1, { message: '제목을 입력해주세요' }),
   description: z.string().optional(),
-  type: z.enum(['template', 'checklist', 'document'], {
-    message: '자료 유형을 선택해주세요',
-  }),
+  typeId: z.string().min(1, { message: '자료 유형을 선택해주세요' }),
   categoryId: z.string().min(1, { message: '카테고리를 선택해주세요' }),
   fileUrl: z.string().min(1, { message: '파일을 업로드하거나 URL을 입력해주세요' }),
   fileName: z.string().min(1, { message: '파일명을 입력해주세요' }),
@@ -80,6 +83,8 @@ export function ResourceForm({ mode, resource }: ResourceFormProps) {
   const [isLoadingVideos, setIsLoadingVideos] = useState(true);
   const [categories, setCategories] = useState<ResourceCategory[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [resourceTypes, setResourceTypes] = useState<ResourceType[]>([]);
+  const [isLoadingTypes, setIsLoadingTypes] = useState(true);
 
   // File upload states
   const [isUploading, setIsUploading] = useState(false);
@@ -113,6 +118,25 @@ export function ResourceForm({ mode, resource }: ResourceFormProps) {
     fetchCategories();
   }, []);
 
+  // Fetch resource types on mount
+  useEffect(() => {
+    async function fetchTypes() {
+      try {
+        const res = await fetch('/api/admin/education/resource-types');
+        const json = await res.json();
+        if (json.success) {
+          setResourceTypes(json.data || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch resource types:', error);
+        toast.error('자료 유형 목록을 불러오지 못했습니다.');
+      } finally {
+        setIsLoadingTypes(false);
+      }
+    }
+    fetchTypes();
+  }, []);
+
   // Fetch videos for linking
   useEffect(() => {
     async function fetchVideos() {
@@ -144,7 +168,7 @@ export function ResourceForm({ mode, resource }: ResourceFormProps) {
         ? {
             title: resource.title,
             description: resource.description || '',
-            type: resource.type as 'template' | 'checklist' | 'document',
+            typeId: resource.typeId || '',
             categoryId: resource.categoryId || '',
             fileUrl: resource.fileUrl,
             fileName: resource.fileName,
@@ -301,7 +325,7 @@ export function ResourceForm({ mode, resource }: ResourceFormProps) {
       const fileSizeNum = data.fileSize ? parseInt(data.fileSize, 10) : null;
       const payload: Record<string, unknown> = {
         title: data.title,
-        type: data.type,
+        typeId: data.typeId,
         categoryId: data.categoryId,
         fileUrl: data.fileUrl,
         fileName: data.fileName,
@@ -483,25 +507,29 @@ export function ResourceForm({ mode, resource }: ResourceFormProps) {
 
           {/* Type */}
           <div>
-            <Label htmlFor="type">자료 유형 *</Label>
+            <Label htmlFor="typeId">자료 유형 *</Label>
             <Select
-              value={watch('type') || undefined}
+              value={watch('typeId') || undefined}
               onValueChange={value =>
-                setValue('type', value as 'template' | 'checklist' | 'document', {
+                setValue('typeId', value, {
                   shouldValidate: true,
                 })
               }
             >
               <SelectTrigger className="mt-1">
-                <SelectValue placeholder="자료 유형을 선택하세요" />
+                <SelectValue
+                  placeholder={isLoadingTypes ? '유형 로딩 중...' : '자료 유형을 선택하세요'}
+                />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="template">템플릿</SelectItem>
-                <SelectItem value="checklist">체크리스트</SelectItem>
-                <SelectItem value="document">문서</SelectItem>
+                {resourceTypes.map(rt => (
+                  <SelectItem key={rt.id} value={rt.id}>
+                    {rt.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
-            {errors.type && <p className="text-sm text-red-600 mt-1">{errors.type.message}</p>}
+            {errors.typeId && <p className="text-sm text-red-600 mt-1">{errors.typeId.message}</p>}
           </div>
 
           {/* Category */}

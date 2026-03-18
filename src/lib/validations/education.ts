@@ -238,25 +238,14 @@ export const updateKnowHowCommentSchema = z.object({
 // Resource (자료실) Schemas
 // ============================================
 
-// 자료 타입 enum
-export const ResourceType = {
-  TEMPLATE: 'template', // 템플릿
-  CHECKLIST: 'checklist', // 체크리스트
-  DOCUMENT: 'document', // 참고 문서
-} as const;
-
-export type ResourceType = (typeof ResourceType)[keyof typeof ResourceType];
-
 // 자료 생성 스키마
 export const createResourceSchema = z.object({
   // 기본 정보 (필수)
   title: z.string().min(1, '제목은 필수입니다').max(200, '제목은 200자 이하여야 합니다'),
   description: z.string().max(1000, '설명은 1000자 이하여야 합니다').nullable().optional(),
 
-  // 자료 타입 (필수)
-  type: z.enum(['template', 'checklist', 'document'], {
-    message: '자료 유형을 선택해주세요',
-  }),
+  // 자료 유형 (필수) - resource_types 테이블 참조
+  typeId: z.string().min(1, '자료 유형을 선택해주세요'),
 
   // 카테고리 연결 (필수)
   categoryId: z.string().min(1, '카테고리를 선택해주세요'),
@@ -277,7 +266,7 @@ export const createResourceSchema = z.object({
 export const updateResourceSchema = z.object({
   title: z.string().min(1).max(200).optional(),
   description: z.string().max(1000).optional(),
-  type: z.enum(['template', 'checklist', 'document']).optional(),
+  typeId: z.string().min(1).optional(),
   fileUrl: z.string().url().optional(),
   fileName: z.string().min(1).optional(),
   fileSize: z.number().int().positive().optional(),
@@ -324,6 +313,24 @@ export const updateResourceCategorySchema = z.object({
 });
 
 // ============================================
+// ResourceType (자료 유형) Schemas
+// ============================================
+
+// 자료 유형 생성 스키마
+export const createResourceTypeSchema = z.object({
+  name: z.string().min(1, '유형 이름은 필수입니다').max(50, '유형 이름은 50자 이하여야 합니다'),
+  description: z.string().max(200, '설명은 200자 이하여야 합니다').optional(),
+  order: z.number().int().min(0, '순서는 0 이상이어야 합니다').default(0),
+});
+
+// 자료 유형 수정 스키마
+export const updateResourceTypeSchema = z.object({
+  name: z.string().min(1).max(50).optional(),
+  description: z.string().max(200).optional(),
+  order: z.number().int().min(0).optional(),
+});
+
+// ============================================
 // TypeScript 타입 export
 // ============================================
 
@@ -344,6 +351,9 @@ export type UpdateKnowHowCategoryInput = z.infer<typeof updateKnowHowCategorySch
 
 export type CreateResourceCategoryInput = z.infer<typeof createResourceCategorySchema>;
 export type UpdateResourceCategoryInput = z.infer<typeof updateResourceCategorySchema>;
+
+export type CreateResourceTypeInput = z.infer<typeof createResourceTypeSchema>;
+export type UpdateResourceTypeInput = z.infer<typeof updateResourceTypeSchema>;
 
 export type CreateKnowHowPostInput = z.infer<typeof createKnowHowPostSchema>;
 export type UpdateKnowHowPostInput = z.infer<typeof updateKnowHowPostSchema>;

@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { FileText, Download, FileCheck, FileSpreadsheet } from 'lucide-react';
+import { FileText, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +10,8 @@ interface Resource {
   id: string;
   title: string;
   description: string | null;
-  type: string;
+  typeId: string | null;
+  resourceType: { id: string; name: string } | null;
   fileUrl: string;
   fileName: string;
   fileSize: number | null;
@@ -21,24 +22,6 @@ interface Resource {
 interface VideoResourcesProps {
   videoId: string;
 }
-
-const typeIcons: Record<string, React.ReactNode> = {
-  template: <FileSpreadsheet className="w-5 h-5 text-blue-600" />,
-  checklist: <FileCheck className="w-5 h-5 text-green-600" />,
-  document: <FileText className="w-5 h-5 text-purple-600" />,
-};
-
-const typeLabels: Record<string, string> = {
-  template: '템플릿',
-  checklist: '체크리스트',
-  document: '문서',
-};
-
-const typeColors: Record<string, string> = {
-  template: 'bg-blue-100 text-blue-800',
-  checklist: 'bg-green-100 text-green-800',
-  document: 'bg-purple-100 text-purple-800',
-};
 
 function formatFileSize(bytes: number | null): string {
   if (!bytes) return '';
@@ -106,16 +89,15 @@ export function VideoResources({ videoId }: VideoResourcesProps) {
               className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                {typeIcons[resource.type] || <FileText className="w-5 h-5 text-gray-600" />}
+                <FileText className="w-5 h-5 text-gray-600" />
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-gray-900 truncate">{resource.title}</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <Badge
-                      variant="secondary"
-                      className={typeColors[resource.type] || 'bg-gray-100 text-gray-800'}
-                    >
-                      {typeLabels[resource.type] || resource.type}
-                    </Badge>
+                    {resource.resourceType && (
+                      <Badge variant="secondary" className="bg-gray-100 text-gray-800">
+                        {resource.resourceType.name}
+                      </Badge>
+                    )}
                     {resource.fileSize && (
                       <span className="text-xs text-gray-500">
                         {formatFileSize(resource.fileSize)}

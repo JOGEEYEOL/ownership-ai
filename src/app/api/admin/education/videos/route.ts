@@ -102,6 +102,13 @@ export async function POST(request: NextRequest) {
     // 5. 첨부자료가 있으면 resources 테이블에도 저장 (비디오와 연결)
     let createdResourcesCount = 0;
     if (validatedData.resources.length > 0) {
+      // '문서' 유형의 ID 조회
+      const { data: documentType } = await supabase
+        .from('resource_types')
+        .select('id')
+        .eq('name', '문서')
+        .single();
+
       const resourcesData = validatedData.resources.map(resource => ({
         title: resource.title,
         fileName: resource.fileName,
@@ -109,7 +116,7 @@ export async function POST(request: NextRequest) {
         fileSize: resource.fileSize,
         categoryId: resource.categoryId,
         videoId: video.id, // 비디오와 연결
-        type: 'document', // 기본 타입
+        typeId: documentType?.id || null, // resource_types 테이블 참조
         tags: [], // 빈 태그
       }));
 

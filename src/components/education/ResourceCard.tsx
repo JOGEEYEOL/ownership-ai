@@ -28,16 +28,6 @@ export function ResourceCard({ resource }: ResourceCardProps) {
     return `${mb.toFixed(1)} MB`;
   };
 
-  // 타입 라벨
-  const getTypeLabel = (type: string) => {
-    const labels: Record<string, string> = {
-      template: '템플릿',
-      checklist: '체크리스트',
-      document: '문서',
-    };
-    return labels[type] || type;
-  };
-
   // 다운로드 핸들러
   const handleDownload = () => {
     downloadResource.mutate(resource.id);
@@ -47,9 +37,11 @@ export function ResourceCard({ resource }: ResourceCardProps) {
     <Card className="hover:shadow-lg transition-all duration-200 h-full">
       <CardHeader>
         {/* 타입 */}
-        <Badge variant="secondary" className="mb-2 w-fit">
-          {getTypeLabel(resource.type)}
-        </Badge>
+        {resource.resourceType && (
+          <Badge variant="secondary" className="mb-2 w-fit">
+            {resource.resourceType.name}
+          </Badge>
+        )}
 
         {/* 제목 */}
         <CardTitle className="text-lg line-clamp-2 flex items-center gap-2">

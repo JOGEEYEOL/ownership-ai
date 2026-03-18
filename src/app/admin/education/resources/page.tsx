@@ -1,4 +1,4 @@
-import { FileText, Plus, Download, FolderTree } from 'lucide-react';
+import { FileText, Plus, Download, FolderTree, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AdminResourceTable } from '@/components/admin/AdminResourceTable';
 import { supabaseAdmin } from '@/lib/supabase/admin';
@@ -18,7 +18,8 @@ export default async function AdminResourcesPage() {
       `
       *,
       video:education_videos!resources_videoId_fkey(id, title),
-      category:resource_categories(id, name)
+      category:resource_categories(id, name),
+      resourceType:resource_types(id, name)
     `
     )
     .order('createdAt', { ascending: false });
@@ -72,6 +73,12 @@ export default async function AdminResourcesPage() {
           <p className="text-gray-600 mt-2">교육 자료 및 템플릿 관리</p>
         </div>
         <div className="flex items-center gap-3">
+          <Link href="/admin/education/resources/types">
+            <Button variant="outline">
+              <Tag className="w-4 h-4 mr-2" />
+              유형 관리
+            </Button>
+          </Link>
           <Link href="/admin/education/resources/categories">
             <Button variant="outline">
               <FolderTree className="w-4 h-4 mr-2" />

@@ -24,7 +24,9 @@ export async function GET(request: NextRequest) {
     // 카테고리 정보를 포함하여 조회
     let query = supabase
       .from('resources')
-      .select('*, category:resource_categories(id, name)', { count: 'exact' });
+      .select('*, category:resource_categories(id, name), resourceType:resource_types(id, name)', {
+        count: 'exact',
+      });
 
     // WHERE 조건
     if (categoryId) {
@@ -122,7 +124,7 @@ export async function POST(request: NextRequest) {
       .insert({
         title: validated.title,
         description: validated.description,
-        type: validated.type,
+        typeId: validated.typeId,
         categoryId: validated.categoryId,
         fileUrl: validated.fileUrl,
         fileName: validated.fileName,
@@ -130,7 +132,7 @@ export async function POST(request: NextRequest) {
         tags: validated.tags || [],
         videoId: validated.videoId || null,
       })
-      .select('*, category:resource_categories(id, name)')
+      .select('*, category:resource_categories(id, name), resourceType:resource_types(id, name)')
       .single();
 
     if (createError) {

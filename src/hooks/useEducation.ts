@@ -61,7 +61,8 @@ export interface Resource {
   id: string;
   title: string;
   description: string | null;
-  type: string;
+  typeId: string | null;
+  resourceType: { id: string; name: string } | null; // resource_types JOIN
   fileUrl: string;
   fileName: string;
   fileSize: number | null;

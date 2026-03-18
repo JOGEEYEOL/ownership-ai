@@ -21,7 +21,8 @@ interface Resource {
   id: string;
   title: string;
   description: string | null;
-  type: string;
+  typeId: string | null;
+  resourceType?: { id: string; name: string } | null;
   fileUrl: string;
   fileName: string;
   fileSize: number | null;
@@ -107,6 +108,7 @@ export function AdminResourceTable({ resources }: AdminResourceTableProps) {
         <TableHeader>
           <TableRow>
             <TableHead>제목</TableHead>
+            <TableHead>유형</TableHead>
             <TableHead>카테고리</TableHead>
             <TableHead>연결된 비디오</TableHead>
             <TableHead>파일크기</TableHead>
@@ -129,6 +131,17 @@ export function AdminResourceTable({ resources }: AdminResourceTableProps) {
                     )}
                   </div>
                 </div>
+              </TableCell>
+
+              {/* Type */}
+              <TableCell>
+                {resource.resourceType ? (
+                  <Badge className="bg-purple-100 text-purple-800">
+                    {resource.resourceType.name}
+                  </Badge>
+                ) : (
+                  <span className="text-gray-400">미분류</span>
+                )}
               </TableCell>
 
               {/* Category */}
