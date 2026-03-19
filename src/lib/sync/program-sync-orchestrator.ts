@@ -188,7 +188,8 @@ export class ProgramSyncOrchestrator {
   private async updateSyncMetadata(
     dataSource: string,
     success: boolean,
-    count: number
+    count: number,
+    errorMessage?: string
   ): Promise<void> {
     try {
       const now = new Date();
@@ -202,12 +203,18 @@ export class ProgramSyncOrchestrator {
 
       const newSyncCount = existing ? (existing.syncCount || 0) + 1 : 1;
 
+      // lastResult에 에러 메시지 포함 (디버깅용)
+      let lastResult = success ? 'success' : 'failed';
+      if (!success && errorMessage) {
+        lastResult = `failed: ${errorMessage.slice(0, 200)}`;
+      }
+
       await supabaseAdmin.from('sync_metadata').upsert(
         {
           dataSource,
           lastSyncedAt: now.toISOString(),
           syncCount: newSyncCount,
-          lastResult: success ? 'success' : 'failed',
+          lastResult,
           updatedAt: now.toISOString(),
         },
         {
@@ -314,10 +321,14 @@ export class ProgramSyncOrchestrator {
 
       return totalCount;
     } catch (error) {
-      console.error(`[ProgramSyncOrchestrator] Error syncing from ${dataSource}:`, error);
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      console.error(
+        `[ProgramSyncOrchestrator] ❌ Error syncing from ${dataSource}: ${errorMsg}`,
+        error instanceof Error ? error.stack : ''
+      );
 
-      // ⭐ 실패 시에도 메타데이터 업데이트 (재시도 시 전체 동기화 방지)
-      await this.updateSyncMetadata(dataSource, false, 0);
+      // ⭐ 실패 시에도 메타데이터 업데이트 (에러 메시지 포함)
+      await this.updateSyncMetadata(dataSource, false, 0, errorMsg);
 
       throw error;
     }
@@ -544,14 +555,23 @@ export class ProgramSyncOrchestrator {
 
     if (error) {
       console.error(
-        `[ProgramSyncOrchestrator] Batch insert error for ${dataSource}:`,
-        error.message
+        `[ProgramSyncOrchestrator] Batch insert error for ${dataSource} (${insertRecords.length} records):`,
+        error.message,
+        error.details,
+        error.hint
       );
       // 배치 실패 시 개별 삽입으로 폴백
       let fallbackCount = 0;
       for (const record of insertRecords) {
         try {
-          await supabaseAdmin.from('programs').insert(record);
+          const { error: singleError } = await supabaseAdmin.from('programs').insert(record);
+          if (singleError) {
+            console.error(
+              `[ProgramSyncOrchestrator] Single insert error for ${dataSource}-${record.sourceApiId}:`,
+              singleError.message
+            );
+            continue;
+          }
           fallbackCount++;
         } catch {
           // 개별 실패는 무시
