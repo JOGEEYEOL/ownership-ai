@@ -229,6 +229,7 @@ export class ProgramSyncOrchestrator {
 
   /**
    * 단일 API 클라이언트에서 데이터를 동기화 (증분 동기화 지원)
+   * ⭐ 배치 처리: 페이지 단위로 중복 체크 + 일괄 삽입 (N+1 쿼리 제거)
    *
    * @param client - API 클라이언트
    * @returns 동기화된 프로그램 개수
@@ -248,6 +249,7 @@ export class ProgramSyncOrchestrator {
       const maxPages = 100; // 안전장치: 최대 5000건 (50 * 100)
       const maxDurationMs = 50 * 1000; // 50초 타임아웃 (Vercel Free 60초 제한 내)
       let hasMore = true;
+      let consecutiveAllExistPages = 0; // 연속으로 전부 기존 데이터인 페이지 수
 
       // 페이지네이션으로 순회 (최대 페이지 수 및 시간 제한 적용)
       while (hasMore && currentPage <= maxPages) {
@@ -259,16 +261,13 @@ export class ProgramSyncOrchestrator {
           );
           break;
         }
-        // ⭐ API에서 프로그램 목록 조회 (증분 동기화 파라미터 전달)
+
+        // ⭐ API에서 프로그램 목록 조회
         const rawPrograms = await client.fetchPrograms({
           page: currentPage,
           pageSize,
-          registeredAfter: lastSyncedAt || undefined, // null이면 undefined로 변환
+          registeredAfter: lastSyncedAt || undefined,
         });
-
-        console.log(
-          `[ProgramSyncOrchestrator] Fetched ${rawPrograms.length} programs from ${dataSource} (page ${currentPage})`
-        );
 
         // 프로그램이 없으면 종료
         if (rawPrograms.length === 0) {
@@ -276,18 +275,25 @@ export class ProgramSyncOrchestrator {
           break;
         }
 
-        // 각 프로그램을 데이터베이스에 upsert
-        for (const raw of rawPrograms) {
-          try {
-            await this.upsertProgram(client, raw);
-            totalCount++;
-          } catch (error) {
-            console.error(
-              `[ProgramSyncOrchestrator] Error upserting program from ${dataSource}:`,
-              error
+        // ⭐ 배치 처리: 페이지 전체를 한번에 처리
+        const insertedCount = await this.batchUpsertPrograms(client, rawPrograms);
+        totalCount += insertedCount;
+
+        console.log(
+          `[ProgramSyncOrchestrator] Page ${currentPage}: ${rawPrograms.length} fetched, ${insertedCount} new from ${dataSource}`
+        );
+
+        // ⭐ 조기 종료: 연속 3페이지 이상 새 데이터가 없으면 중단
+        if (insertedCount === 0) {
+          consecutiveAllExistPages++;
+          if (consecutiveAllExistPages >= 3) {
+            console.log(
+              `[ProgramSyncOrchestrator] ⏹️ ${dataSource}: No new data for ${consecutiveAllExistPages} consecutive pages, stopping early`
             );
-            // 개별 프로그램 upsert 실패는 무시하고 계속 진행
+            break;
           }
+        } else {
+          consecutiveAllExistPages = 0;
         }
 
         // 반환된 프로그램 수가 pageSize보다 적으면 마지막 페이지
@@ -300,7 +306,7 @@ export class ProgramSyncOrchestrator {
 
       const elapsed = Math.round((Date.now() - startTime) / 1000);
       console.log(
-        `[ProgramSyncOrchestrator] ✅ Successfully synced ${totalCount} programs from ${dataSource} (${currentPage} pages, ${elapsed}s)`
+        `[ProgramSyncOrchestrator] ✅ ${dataSource}: ${totalCount} new programs (${currentPage} pages, ${elapsed}s)`
       );
 
       // ⭐ 동기화 메타데이터 업데이트
@@ -393,178 +399,168 @@ export class ProgramSyncOrchestrator {
   }
 
   /**
-   * 프로그램 데이터를 데이터베이스에 추가 (신규만)
-   * ⭐ 기존 데이터는 절대 수정하지 않음 - 신규 데이터만 추가
-   * ⭐ 2025년 이후 데이터만 저장 (오래된 데이터 필터링)
-   *
-   * @param client - API 클라이언트
-   * @param raw - 원본 프로그램 데이터
+   * 원본 데이터에서 sourceApiId 추출
    */
-  private async upsertProgram(client: IProgramAPIClient, raw: RawProgramData): Promise<void> {
-    const dataSource = client.getDataSource();
-
-    // 원본 ID 추출 (API별 필드명이 다름, 문자열로 변환)
+  private extractSourceApiId(raw: RawProgramData): string | null {
     const sourceApiIdRaw =
       raw.pblancId || // 기업마당
       raw.pbanc_sn || // K-Startup (숫자)
       raw.intcNoSeq || // KOCCA-PIMS
-      raw.seq || // KOCCA-Finance (link에서 추출)
+      raw.seq || // KOCCA-Finance
       raw.id ||
       raw.announcementId ||
       raw.bizId ||
       raw.noticeId;
 
-    const sourceApiId = sourceApiIdRaw ? String(sourceApiIdRaw) : null;
+    return sourceApiIdRaw ? String(sourceApiIdRaw) : null;
+  }
 
-    if (!sourceApiId) {
-      console.warn(`[ProgramSyncOrchestrator] Skipping program without ID from ${dataSource}`, raw);
-      return;
-    }
-
-    // ⭐ 기존 데이터 존재 여부 확인
-    const { data: existing } = await supabaseAdmin
-      .from('programs')
-      .select('id')
-      .eq('dataSource', dataSource)
-      .eq('sourceApiId', sourceApiId)
-      .single();
-
-    // 이미 존재하면 아무것도 하지 않음 (기존 데이터 보존)
-    if (existing) {
-      console.log(
-        `[ProgramSyncOrchestrator] Program already exists, skipping: ${dataSource}-${sourceApiId}`
-      );
-      return;
-    }
-
-    // 필드 추출 (API별 필드명이 다름)
-    const title =
-      (raw.pblancNm as string) || // 기업마당
-      (raw.biz_pbanc_nm as string) || // K-Startup
-      (raw.title as string) ||
-      (raw.announcementTitle as string) ||
-      '제목 없음';
-
-    // K-Startup의 경우 섹션별로 구조화된 description 생성
-    let description: string | null = null;
-    if (dataSource === 'K-Startup') {
-      const sections: string[] = [];
-
-      // 공고 상세
-      if (raw.pbanc_ctnt && typeof raw.pbanc_ctnt === 'string') {
-        sections.push(`공고 상세: ${raw.pbanc_ctnt}`);
-      }
-
-      // 지원 대상
-      if (raw.aply_trgt_ctnt && typeof raw.aply_trgt_ctnt === 'string') {
-        sections.push(`지원 대상: ${raw.aply_trgt_ctnt}`);
-      }
-
-      // 연령 제한
-      if (raw.biz_trgt_age && typeof raw.biz_trgt_age === 'string') {
-        sections.push(`연령 제한: ${raw.biz_trgt_age}`);
-      }
-
-      // 지원 제한 대상
-      if (raw.aply_excl_trgt_ctnt && typeof raw.aply_excl_trgt_ctnt === 'string') {
-        sections.push(`지원 제한 대상: ${raw.aply_excl_trgt_ctnt}`);
-      }
-
-      // 주관 기관
-      if (raw.pbanc_ntrp_nm && typeof raw.pbanc_ntrp_nm === 'string') {
-        sections.push(`주관 기관: ${raw.pbanc_ntrp_nm}`);
-      }
-
-      // 지원 분야
-      if (raw.supt_biz_clsfc && typeof raw.supt_biz_clsfc === 'string') {
-        sections.push(`지원 분야: ${raw.supt_biz_clsfc}`);
-      }
-
-      description = sections.length > 0 ? sections.join('\n\n') : null;
-    } else if (dataSource === 'KOCCA-Finance') {
-      // KOCCA-Finance의 경우 HTML 엔티티만 디코딩, HTML 태그는 유지 (구조 보존)
-      const rawContent = (raw.content as string) || null;
-      if (rawContent) {
-        description = this.decodeHtmlEntities(rawContent);
-      }
-    } else if (dataSource === '서울테크노파크' || dataSource === '경기테크노파크') {
-      // 테크노파크의 경우 사업유형, 주관기관 정보를 description에 포함
-      const sections: string[] = [];
-
-      if (raw.businessType && typeof raw.businessType === 'string') {
-        sections.push(`사업유형: ${raw.businessType}`);
-      }
-      if (raw.hostOrganization && typeof raw.hostOrganization === 'string') {
-        sections.push(`주관기관: ${raw.hostOrganization}`);
-      }
-      if (raw.applicationPeriod && typeof raw.applicationPeriod === 'string') {
-        sections.push(`신청기간: ${raw.applicationPeriod}`);
-      }
-      if (raw.author && typeof raw.author === 'string') {
-        sections.push(`작성자: ${raw.author}`);
-      }
-
-      description = sections.length > 0 ? sections.join('\n') : null;
-    } else {
-      // 기업마당, KOCCA-PIMS 등 다른 API
-      description =
-        (raw.bsnsSumryCn as string) || // 기업마당
-        (raw.description as string) ||
-        (raw.content as string) ||
-        null;
-    }
-
-    const category =
-      (raw.pldirSportRealmLclasCodeNm as string) || // 기업마당
-      (raw.supt_biz_clsfc as string) || // K-Startup
-      (raw.cate as string) || // KOCCA-PIMS
-      (raw.businessType as string) || // 테크노파크 (사업유형)
-      (raw.category as string) ||
-      null;
-    const targetAudience = client.parseTargetAudience(raw);
-    const targetLocation = client.parseLocation(raw);
-    const keywords = client.extractKeywords(raw);
-    const budgetRange = (raw.budgetRange as string) || null;
-    const deadline = client.parseDeadline(raw); // ⭐ API 클라이언트가 마감일 추출
-    const sourceUrl = client.parseSourceUrl(raw); // ⭐ API 클라이언트가 URL 추출
-    const attachmentUrl = client.parseAttachmentUrl(raw); // ⭐ API 클라이언트가 첨부파일 URL 추출
-    const registeredAt = client.parseRegisteredAt(raw); // ⭐ 교차 정렬용
-    const startDate = client.parseStartDate(raw); // ⭐ API 클라이언트가 시작일 추출
-    const endDate = deadline; // ⭐ endDate는 deadline과 동일
-
-    // ⭐ 2025년 1월 1일 이전 데이터는 스킵 (오래된 데이터 필터링)
+  /**
+   * 페이지 단위 배치 upsert (N+1 쿼리 제거)
+   * ⭐ 50건 페이지 → SELECT 1회 + INSERT 1회 (기존: SELECT 50회 + INSERT 50회)
+   *
+   * @param client - API 클라이언트
+   * @param rawPrograms - 원본 프로그램 데이터 배열 (1 페이지분)
+   * @returns 실제 삽입된 신규 프로그램 수
+   */
+  private async batchUpsertPrograms(
+    client: IProgramAPIClient,
+    rawPrograms: RawProgramData[]
+  ): Promise<number> {
+    const dataSource = client.getDataSource();
     const cutoffDate = new Date('2025-01-01');
-    if (registeredAt < cutoffDate) {
-      console.log(
-        `[ProgramSyncOrchestrator] ⏭️  Skipping old program (registered: ${registeredAt.toISOString().split('T')[0]}) from ${dataSource}`
-      );
-      return;
+
+    // 1단계: sourceApiId 추출 및 유효한 프로그램 필터링
+    const programsWithIds: Array<{ raw: RawProgramData; sourceApiId: string }> = [];
+    for (const raw of rawPrograms) {
+      const sourceApiId = this.extractSourceApiId(raw);
+      if (!sourceApiId) continue;
+
+      // 2025년 이전 데이터 필터링
+      const registeredAt = client.parseRegisteredAt(raw);
+      if (registeredAt < cutoffDate) continue;
+
+      programsWithIds.push({ raw, sourceApiId });
     }
 
-    // ⭐ 신규 프로그램만 생성 (기존 데이터는 위에서 이미 체크하여 리턴됨)
-    await supabaseAdmin.from('programs').insert({
-      dataSource,
-      sourceApiId,
-      title,
-      description,
-      category,
-      targetAudience,
-      targetLocation,
-      keywords,
-      budgetRange,
-      deadline: deadline?.toISOString(),
-      sourceUrl,
-      attachmentUrl, // ⭐ 첨부파일 URL (기업마당 API만 제공)
-      registeredAt: registeredAt?.toISOString(), // ⭐ 교차 정렬용
-      startDate: startDate?.toISOString(),
-      endDate: endDate?.toISOString(),
-      rawData: raw as object,
-      syncStatus: 'active',
+    if (programsWithIds.length === 0) return 0;
+
+    // 2단계: 배치 중복 체크 (1회의 SELECT로 전체 페이지 확인)
+    const sourceApiIds = programsWithIds.map(p => p.sourceApiId);
+    const { data: existingRecords } = await supabaseAdmin
+      .from('programs')
+      .select('sourceApiId')
+      .eq('dataSource', dataSource)
+      .in('sourceApiId', sourceApiIds);
+
+    const existingIds = new Set((existingRecords || []).map(r => r.sourceApiId));
+
+    // 3단계: 신규 프로그램만 필터링
+    const newPrograms = programsWithIds.filter(p => !existingIds.has(p.sourceApiId));
+
+    if (newPrograms.length === 0) return 0;
+
+    // 4단계: 삽입 레코드 생성
+    const insertRecords = newPrograms.map(({ raw, sourceApiId }) => {
+      const title =
+        (raw.pblancNm as string) || // 기업마당
+        (raw.biz_pbanc_nm as string) || // K-Startup
+        (raw.title as string) ||
+        (raw.announcementTitle as string) ||
+        '제목 없음';
+
+      let description: string | null = null;
+      if (dataSource === 'K-Startup') {
+        const sections: string[] = [];
+        if (raw.pbanc_ctnt && typeof raw.pbanc_ctnt === 'string')
+          sections.push(`공고 상세: ${raw.pbanc_ctnt}`);
+        if (raw.aply_trgt_ctnt && typeof raw.aply_trgt_ctnt === 'string')
+          sections.push(`지원 대상: ${raw.aply_trgt_ctnt}`);
+        if (raw.biz_trgt_age && typeof raw.biz_trgt_age === 'string')
+          sections.push(`연령 제한: ${raw.biz_trgt_age}`);
+        if (raw.aply_excl_trgt_ctnt && typeof raw.aply_excl_trgt_ctnt === 'string')
+          sections.push(`지원 제한 대상: ${raw.aply_excl_trgt_ctnt}`);
+        if (raw.pbanc_ntrp_nm && typeof raw.pbanc_ntrp_nm === 'string')
+          sections.push(`주관 기관: ${raw.pbanc_ntrp_nm}`);
+        if (raw.supt_biz_clsfc && typeof raw.supt_biz_clsfc === 'string')
+          sections.push(`지원 분야: ${raw.supt_biz_clsfc}`);
+        description = sections.length > 0 ? sections.join('\n\n') : null;
+      } else if (dataSource === 'KOCCA-Finance') {
+        const rawContent = (raw.content as string) || null;
+        if (rawContent) description = this.decodeHtmlEntities(rawContent);
+      } else if (dataSource === '서울테크노파크' || dataSource === '경기테크노파크') {
+        const sections: string[] = [];
+        if (raw.businessType && typeof raw.businessType === 'string')
+          sections.push(`사업유형: ${raw.businessType}`);
+        if (raw.hostOrganization && typeof raw.hostOrganization === 'string')
+          sections.push(`주관기관: ${raw.hostOrganization}`);
+        if (raw.applicationPeriod && typeof raw.applicationPeriod === 'string')
+          sections.push(`신청기간: ${raw.applicationPeriod}`);
+        if (raw.author && typeof raw.author === 'string') sections.push(`작성자: ${raw.author}`);
+        description = sections.length > 0 ? sections.join('\n') : null;
+      } else {
+        description =
+          (raw.bsnsSumryCn as string) ||
+          (raw.description as string) ||
+          (raw.content as string) ||
+          null;
+      }
+
+      const category =
+        (raw.pldirSportRealmLclasCodeNm as string) ||
+        (raw.supt_biz_clsfc as string) ||
+        (raw.cate as string) ||
+        (raw.businessType as string) ||
+        (raw.category as string) ||
+        null;
+
+      const deadline = client.parseDeadline(raw);
+      const registeredAt = client.parseRegisteredAt(raw);
+      const startDate = client.parseStartDate(raw);
+
+      return {
+        dataSource,
+        sourceApiId,
+        title,
+        description,
+        category,
+        targetAudience: client.parseTargetAudience(raw),
+        targetLocation: client.parseLocation(raw),
+        keywords: client.extractKeywords(raw),
+        budgetRange: (raw.budgetRange as string) || null,
+        deadline: deadline?.toISOString(),
+        sourceUrl: client.parseSourceUrl(raw),
+        attachmentUrl: client.parseAttachmentUrl(raw),
+        registeredAt: registeredAt?.toISOString(),
+        startDate: startDate?.toISOString(),
+        endDate: deadline?.toISOString(),
+        rawData: raw as object,
+        syncStatus: 'active',
+      };
     });
 
-    console.log(
-      `[ProgramSyncOrchestrator] ✅ New program added: ${dataSource}-${sourceApiId} - ${title}`
-    );
+    // 5단계: 배치 INSERT (1회의 INSERT로 전체 신규 프로그램 삽입)
+    const { error } = await supabaseAdmin.from('programs').insert(insertRecords);
+
+    if (error) {
+      console.error(
+        `[ProgramSyncOrchestrator] Batch insert error for ${dataSource}:`,
+        error.message
+      );
+      // 배치 실패 시 개별 삽입으로 폴백
+      let fallbackCount = 0;
+      for (const record of insertRecords) {
+        try {
+          await supabaseAdmin.from('programs').insert(record);
+          fallbackCount++;
+        } catch {
+          // 개별 실패는 무시
+        }
+      }
+      return fallbackCount;
+    }
+
+    return insertRecords.length;
   }
 
   /**
