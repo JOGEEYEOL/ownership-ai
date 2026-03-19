@@ -10,6 +10,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ProgramSyncOrchestrator } from '@/lib/sync/program-sync-orchestrator';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 
+// Vercel Serverless Function 최대 실행 시간 (초)
+// Hobby: 최대 60초, Pro: 최대 300초
+export const maxDuration = 300;
+
 /**
  * 만료된 공지사항/이벤트 자동 처리
  * - endDate가 현재 시간보다 이전인 공지/이벤트의 isPinned를 false로 변경
@@ -93,6 +97,18 @@ export async function GET(request: NextRequest) {
     }
 
     console.log('[GET /api/cron/sync-programs] Starting scheduled sync...');
+    console.log('[GET /api/cron/sync-programs] Environment check:', {
+      BIZINFO_API_KEY: process.env.BIZINFO_API_KEY
+        ? `set (${process.env.BIZINFO_API_KEY.length} chars)`
+        : 'MISSING',
+      BIZINFO_API_BASE_URL: process.env.BIZINFO_API_BASE_URL ? 'set' : 'MISSING',
+      PUBLIC_DATA_API_KEY: process.env.PUBLIC_DATA_API_KEY
+        ? `set (${process.env.PUBLIC_DATA_API_KEY.length} chars)`
+        : 'MISSING',
+      KSTARTUP_API_BASE_URL: process.env.KSTARTUP_API_BASE_URL ? 'set' : 'MISSING',
+      KOCCA_PIMS_API_KEY: process.env.KOCCA_PIMS_API_KEY ? 'set' : 'MISSING',
+      KOCCA_FIN_API_KEY: process.env.KOCCA_FIN_API_KEY ? 'set' : 'MISSING',
+    });
 
     // ProgramSyncOrchestrator 인스턴스 생성
     const orchestrator = new ProgramSyncOrchestrator();
@@ -100,7 +116,7 @@ export async function GET(request: NextRequest) {
     try {
       // 1. 모든 API 동기화 실행
       const stats = await orchestrator.syncAll();
-      console.log('[GET /api/cron/sync-programs] Sync completed:', stats);
+      console.log('[GET /api/cron/sync-programs] Sync completed:', JSON.stringify(stats, null, 2));
 
       // 2. 만료된 공지사항/이벤트 자동 처리
       const expiredResult = await expireEndedAnnouncements();

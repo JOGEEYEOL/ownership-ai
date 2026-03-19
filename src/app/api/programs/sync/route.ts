@@ -8,6 +8,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ProgramSyncOrchestrator } from '@/lib/sync/program-sync-orchestrator';
 import { createErrorResponse, logError } from '@/lib/utils/error-handler';
 
+// Vercel Serverless Function 최대 실행 시간 (초)
+export const maxDuration = 300;
+
 /**
  * POST /api/programs/sync
  *

@@ -48,16 +48,34 @@ interface SyncStats {
  */
 export class ProgramSyncOrchestrator {
   private readonly clients: IProgramAPIClient[];
+  private readonly initErrors: Array<{ name: string; error: string }>;
 
   constructor() {
-    this.clients = [
-      new BizinfoAPIClient(),
-      new KStartupAPIClient(),
-      new KoccaPIMSAPIClient(),
-      new KoccaFinanceAPIClient(),
-      // new SeoulTPAPIClient(), // ⚠️ 서울테크노파크 크롤링 금지로 비활성화
-      // new GyeonggiTPAPIClient(), // ⚠️ 경기테크노파크 크롤링 금지로 비활성화
+    this.clients = [];
+    this.initErrors = [];
+
+    // 각 클라이언트를 개별적으로 생성 (하나의 실패가 전체를 막지 않도록)
+    const clientFactories: Array<{ name: string; factory: () => IProgramAPIClient }> = [
+      { name: '기업마당', factory: () => new BizinfoAPIClient() },
+      { name: 'K-Startup', factory: () => new KStartupAPIClient() },
+      { name: 'KOCCA-PIMS', factory: () => new KoccaPIMSAPIClient() },
+      { name: 'KOCCA-Finance', factory: () => new KoccaFinanceAPIClient() },
     ];
+
+    for (const { name, factory } of clientFactories) {
+      try {
+        this.clients.push(factory());
+        console.log(`[ProgramSyncOrchestrator] ✅ ${name} client initialized`);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.error(`[ProgramSyncOrchestrator] ❌ Failed to initialize ${name} client:`, message);
+        this.initErrors.push({ name, error: message });
+      }
+    }
+
+    console.log(
+      `[ProgramSyncOrchestrator] Initialized: ${this.clients.length} clients, ${this.initErrors.length} failed`
+    );
   }
 
   /**
@@ -67,13 +85,22 @@ export class ProgramSyncOrchestrator {
    */
   async syncAll(): Promise<SyncStats> {
     console.log('[ProgramSyncOrchestrator] Starting sync for all APIs...');
+    console.log(
+      `[ProgramSyncOrchestrator] Active clients: ${this.clients.map(c => c.getDataSource()).join(', ')}`
+    );
+
+    if (this.initErrors.length > 0) {
+      console.warn(
+        `[ProgramSyncOrchestrator] ⚠️ Init failures: ${this.initErrors.map(e => `${e.name}: ${e.error}`).join('; ')}`
+      );
+    }
 
     // Promise.allSettled로 병렬 동기화 (부분 실패 허용)
     const results = await Promise.allSettled(
       this.clients.map(client => this.syncFromClient(client))
     );
 
-    // 결과 집계
+    // 결과 집계 (성공한 클라이언트)
     const syncResults: SyncResult[] = results.map((result, index) => {
       const dataSource = this.clients[index].getDataSource();
 
@@ -84,6 +111,7 @@ export class ProgramSyncOrchestrator {
           count: result.value,
         };
       } else {
+        console.error(`[ProgramSyncOrchestrator] ❌ ${dataSource} sync failed:`, result.reason);
         return {
           dataSource,
           success: false,
@@ -92,19 +120,28 @@ export class ProgramSyncOrchestrator {
       }
     });
 
+    // 초기화 실패한 클라이언트도 결과에 포함
+    for (const initError of this.initErrors) {
+      syncResults.push({
+        dataSource: initError.name,
+        success: false,
+        error: `Client init failed: ${initError.error}`,
+      });
+    }
+
     const succeeded = syncResults.filter(r => r.success).length;
     const failed = syncResults.filter(r => !r.success).length;
     const programCount = syncResults.reduce((sum, r) => sum + (r.count || 0), 0);
 
     const stats: SyncStats = {
-      total: results.length,
+      total: syncResults.length,
       succeeded,
       failed,
       programCount,
       results: syncResults,
     };
 
-    console.log('[ProgramSyncOrchestrator] Sync completed:', stats);
+    console.log('[ProgramSyncOrchestrator] Sync completed:', JSON.stringify(stats, null, 2));
 
     return stats;
   }
@@ -198,6 +235,7 @@ export class ProgramSyncOrchestrator {
    */
   private async syncFromClient(client: IProgramAPIClient): Promise<number> {
     const dataSource = client.getDataSource();
+    const startTime = Date.now();
     console.log(`[ProgramSyncOrchestrator] Syncing from ${dataSource}...`);
 
     try {
@@ -207,10 +245,20 @@ export class ProgramSyncOrchestrator {
       let totalCount = 0;
       let currentPage = 1;
       const pageSize = 50;
+      const maxPages = 100; // 안전장치: 최대 5000건 (50 * 100)
+      const maxDurationMs = 4 * 60 * 1000; // 4분 타임아웃 (Vercel 5분 제한 내)
       let hasMore = true;
 
-      // ⭐ 페이지 제한 제거 - API가 빈 응답 반환할 때까지 계속 조회
-      while (hasMore) {
+      // 페이지네이션으로 순회 (최대 페이지 수 및 시간 제한 적용)
+      while (hasMore && currentPage <= maxPages) {
+        // 타임아웃 체크
+        const elapsed = Date.now() - startTime;
+        if (elapsed > maxDurationMs) {
+          console.warn(
+            `[ProgramSyncOrchestrator] ⏱️ ${dataSource} timeout after ${Math.round(elapsed / 1000)}s, stopping at page ${currentPage} (${totalCount} programs synced)`
+          );
+          break;
+        }
         // ⭐ API에서 프로그램 목록 조회 (증분 동기화 파라미터 전달)
         const rawPrograms = await client.fetchPrograms({
           page: currentPage,
@@ -250,8 +298,9 @@ export class ProgramSyncOrchestrator {
         }
       }
 
+      const elapsed = Math.round((Date.now() - startTime) / 1000);
       console.log(
-        `[ProgramSyncOrchestrator] Successfully synced ${totalCount} programs from ${dataSource} (${currentPage} pages)`
+        `[ProgramSyncOrchestrator] ✅ Successfully synced ${totalCount} programs from ${dataSource} (${currentPage} pages, ${elapsed}s)`
       );
 
       // ⭐ 동기화 메타데이터 업데이트
