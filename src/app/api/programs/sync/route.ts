@@ -9,7 +9,8 @@ import { ProgramSyncOrchestrator } from '@/lib/sync/program-sync-orchestrator';
 import { createErrorResponse, logError } from '@/lib/utils/error-handler';
 
 // Vercel Serverless Function 최대 실행 시간 (초)
-export const maxDuration = 300;
+// Free/Hobby: 최대 60초, Pro: 최대 300초
+export const maxDuration = 60;
 
 /**
  * POST /api/programs/sync

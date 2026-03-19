@@ -246,7 +246,7 @@ export class ProgramSyncOrchestrator {
       let currentPage = 1;
       const pageSize = 50;
       const maxPages = 100; // 안전장치: 최대 5000건 (50 * 100)
-      const maxDurationMs = 4 * 60 * 1000; // 4분 타임아웃 (Vercel 5분 제한 내)
+      const maxDurationMs = 50 * 1000; // 50초 타임아웃 (Vercel Free 60초 제한 내)
       let hasMore = true;
 
       // 페이지네이션으로 순회 (최대 페이지 수 및 시간 제한 적용)

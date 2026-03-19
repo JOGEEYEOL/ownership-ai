@@ -11,8 +11,8 @@ import { ProgramSyncOrchestrator } from '@/lib/sync/program-sync-orchestrator';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 
 // Vercel Serverless Function 최대 실행 시간 (초)
-// Hobby: 최대 60초, Pro: 최대 300초
-export const maxDuration = 300;
+// Free/Hobby: 최대 60초, Pro: 최대 300초
+export const maxDuration = 60;
 
 /**
  * 만료된 공지사항/이벤트 자동 처리
