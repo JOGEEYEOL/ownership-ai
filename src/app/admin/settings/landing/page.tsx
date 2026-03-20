@@ -535,7 +535,58 @@ export default function LandingSettingsPage() {
       </div>
 
       <form onSubmit={handleSubmit(onSubmitSettings)}>
-        <Accordion type="multiple" defaultValue={['hero']} className="space-y-4">
+        <Accordion type="multiple" defaultValue={['metadata']} className="space-y-4">
+          {/* ─── 메타데이터 설정 ───────────── */}
+          <div className="border rounded-lg bg-white overflow-hidden">
+            <AccordionItem value="metadata" className="border-0">
+              <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-gray-100 rounded-lg">
+                    <Search className="w-5 h-5 text-gray-500" />
+                  </div>
+                  <div className="text-left">
+                    <h2 className="text-lg font-semibold text-gray-900">메타데이터 설정</h2>
+                    <p className="text-sm text-gray-500 font-normal">
+                      브라우저 탭 제목, 검색엔진 노출 정보를 관리합니다.
+                    </p>
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6 space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">브라우저 탭 제목</CardTitle>
+                    <CardDescription>
+                      브라우저 탭과 검색 결과에 표시되는 사이트 제목입니다.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Input
+                      {...register('siteTitle')}
+                      placeholder="Ownership AI - 컨설턴트 관리 플랫폼"
+                      className="max-w-lg"
+                    />
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">사이트 설명</CardTitle>
+                    <CardDescription>
+                      검색 결과와 소셜 미디어 공유 시 표시되는 설명입니다.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Input
+                      {...register('siteDescription')}
+                      placeholder="1인 컨설턴트를 위한 고객 정보 관리 및 정부지원사업 매칭 SaaS 플랫폼"
+                      className="max-w-lg"
+                    />
+                  </CardContent>
+                </Card>
+              </AccordionContent>
+            </AccordionItem>
+          </div>
+
           {/* ─── Hero 설정 ──────────────────── */}
           <div className="border rounded-lg bg-white overflow-hidden">
             <AccordionItem value="hero" className="border-0">
@@ -619,76 +670,6 @@ export default function LandingSettingsPage() {
                     />
                   </CardContent>
                 </Card>
-              </AccordionContent>
-            </AccordionItem>
-          </div>
-
-          {/* ─── FAQ 관리 ──────────────────── */}
-          <div className="border rounded-lg bg-white overflow-hidden">
-            <AccordionItem value="faq" className="border-0">
-              <AccordionTrigger className="px-6 py-4 hover:no-underline">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gray-100 rounded-lg">
-                    <MessageSquareText className="w-5 h-5 text-gray-500" />
-                  </div>
-                  <div className="text-left">
-                    <h2 className="text-lg font-semibold text-gray-900">FAQ 관리</h2>
-                    <p className="text-sm text-gray-500 font-normal">
-                      자주 묻는 질문을 추가/수정/삭제합니다. {faqs.length}개 항목
-                    </p>
-                  </div>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-6 pb-6">
-                <div className="flex justify-end mb-4">
-                  <Button onClick={openAddFaqDialog} size="sm">
-                    <Plus className="w-4 h-4 mr-2" />
-                    FAQ 추가
-                  </Button>
-                </div>
-                {faqsLoading ? (
-                  <div className="flex justify-center py-8">
-                    <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-                  </div>
-                ) : faqs.length === 0 ? (
-                  <p className="text-gray-400 text-center py-8">등록된 FAQ가 없습니다.</p>
-                ) : (
-                  <div className="space-y-3">
-                    {faqs.map(faq => (
-                      <Card key={faq.id} className={!faq.isActive ? 'opacity-50' : ''}>
-                        <CardContent className="p-4">
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-gray-900 truncate">{faq.question}</p>
-                              <p className="text-sm text-gray-500 mt-1 line-clamp-2">
-                                {faq.answer}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-1 flex-shrink-0">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => openEditFaqDialog(faq)}
-                              >
-                                <Pencil className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                                onClick={() =>
-                                  setDeleteTarget({ type: 'faq', id: faq.id, name: faq.question })
-                                }
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
               </AccordionContent>
             </AccordionItem>
           </div>
@@ -884,6 +865,76 @@ export default function LandingSettingsPage() {
             </AccordionItem>
           </div>
 
+          {/* ─── FAQ 관리 ──────────────────── */}
+          <div className="border rounded-lg bg-white overflow-hidden">
+            <AccordionItem value="faq" className="border-0">
+              <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-gray-100 rounded-lg">
+                    <MessageSquareText className="w-5 h-5 text-gray-500" />
+                  </div>
+                  <div className="text-left">
+                    <h2 className="text-lg font-semibold text-gray-900">FAQ 관리</h2>
+                    <p className="text-sm text-gray-500 font-normal">
+                      자주 묻는 질문을 추가/수정/삭제합니다. {faqs.length}개 항목
+                    </p>
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6">
+                <div className="flex justify-end mb-4">
+                  <Button onClick={openAddFaqDialog} size="sm">
+                    <Plus className="w-4 h-4 mr-2" />
+                    FAQ 추가
+                  </Button>
+                </div>
+                {faqsLoading ? (
+                  <div className="flex justify-center py-8">
+                    <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+                  </div>
+                ) : faqs.length === 0 ? (
+                  <p className="text-gray-400 text-center py-8">등록된 FAQ가 없습니다.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {faqs.map(faq => (
+                      <Card key={faq.id} className={!faq.isActive ? 'opacity-50' : ''}>
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-gray-900 truncate">{faq.question}</p>
+                              <p className="text-sm text-gray-500 mt-1 line-clamp-2">
+                                {faq.answer}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-1 flex-shrink-0">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => openEditFaqDialog(faq)}
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                                onClick={() =>
+                                  setDeleteTarget({ type: 'faq', id: faq.id, name: faq.question })
+                                }
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </AccordionContent>
+            </AccordionItem>
+          </div>
+
           {/* ─── 약관 관리 ─────────────────── */}
           <div className="border rounded-lg bg-white overflow-hidden">
             <AccordionItem value="legal" className="border-0">
@@ -1003,57 +1054,6 @@ export default function LandingSettingsPage() {
                       연락처 설정 페이지에서 수정
                       <span aria-hidden>→</span>
                     </a>
-                  </CardContent>
-                </Card>
-              </AccordionContent>
-            </AccordionItem>
-          </div>
-
-          {/* ─── 메타데이터 설정 ───────────── */}
-          <div className="border rounded-lg bg-white overflow-hidden">
-            <AccordionItem value="metadata" className="border-0">
-              <AccordionTrigger className="px-6 py-4 hover:no-underline">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gray-100 rounded-lg">
-                    <Search className="w-5 h-5 text-gray-500" />
-                  </div>
-                  <div className="text-left">
-                    <h2 className="text-lg font-semibold text-gray-900">메타데이터 설정</h2>
-                    <p className="text-sm text-gray-500 font-normal">
-                      브라우저 탭 제목, 검색엔진 노출 정보를 관리합니다.
-                    </p>
-                  </div>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-6 pb-6 space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">브라우저 탭 제목</CardTitle>
-                    <CardDescription>
-                      브라우저 탭과 검색 결과에 표시되는 사이트 제목입니다.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Input
-                      {...register('siteTitle')}
-                      placeholder="Ownership AI - 컨설턴트 관리 플랫폼"
-                      className="max-w-lg"
-                    />
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">사이트 설명</CardTitle>
-                    <CardDescription>
-                      검색 결과와 소셜 미디어 공유 시 표시되는 설명입니다.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Input
-                      {...register('siteDescription')}
-                      placeholder="1인 컨설턴트를 위한 고객 정보 관리 및 정부지원사업 매칭 SaaS 플랫폼"
-                      className="max-w-lg"
-                    />
                   </CardContent>
                 </Card>
               </AccordionContent>
