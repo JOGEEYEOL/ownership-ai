@@ -4,14 +4,16 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, Clock, Heart } from 'lucide-react';
 import { Card } from '../common/Card';
+import { getIconByName } from '@/lib/icon-map';
 
-const icons = [TrendingUp, Clock, Heart];
+const defaultIcons = [TrendingUp, Clock, Heart];
 
 interface ImpactItem {
   title: string;
   description: string;
   metric: string;
   metricLabel: string;
+  icon?: string;
 }
 
 interface ImpactSectionProps {
@@ -76,7 +78,9 @@ export const ImpactSection: React.FC<ImpactSectionProps> = ({
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {impacts.map((impact, index) => {
-            const Icon = icons[index % icons.length];
+            const Icon = impact.icon
+              ? getIconByName(impact.icon, defaultIcons[index % defaultIcons.length])
+              : defaultIcons[index % defaultIcons.length];
             return (
               <motion.div
                 key={index}

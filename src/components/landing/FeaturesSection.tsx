@@ -3,12 +3,14 @@
 import React from 'react';
 import { Users, Target, BarChart, Bell, FileText, Zap } from 'lucide-react';
 import { FeatureCard } from './FeatureCard';
+import { getIconByName } from '@/lib/icon-map';
 
-const icons = [Users, Target, BarChart, Bell, FileText, Zap];
+const defaultIcons = [Users, Target, BarChart, Bell, FileText, Zap];
 
 interface FeatureItem {
   title: string;
   description: string;
+  icon?: string;
 }
 
 interface FeaturesSectionProps {
@@ -65,15 +67,20 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-          {features.map((feature, index) => (
-            <FeatureCard
-              key={index}
-              icon={icons[index % icons.length]}
-              title={feature.title}
-              description={feature.description}
-              index={index}
-            />
-          ))}
+          {features.map((feature, index) => {
+            const Icon = feature.icon
+              ? getIconByName(feature.icon, defaultIcons[index % defaultIcons.length])
+              : defaultIcons[index % defaultIcons.length];
+            return (
+              <FeatureCard
+                key={index}
+                icon={Icon}
+                title={feature.title}
+                description={feature.description}
+                index={index}
+              />
+            );
+          })}
         </div>
       </div>
     </section>

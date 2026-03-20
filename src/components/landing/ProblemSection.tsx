@@ -2,14 +2,16 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { AlertCircle, Clock, FileX } from 'lucide-react';
+import { FileX, Clock, AlertCircle } from 'lucide-react';
 import { Card } from '../common/Card';
+import { getIconByName } from '@/lib/icon-map';
 
-const icons = [FileX, Clock, AlertCircle];
+const defaultIcons = [FileX, Clock, AlertCircle];
 
 interface ProblemItem {
   title: string;
   description: string;
+  icon?: string;
 }
 
 interface ProblemSectionProps {
@@ -69,7 +71,9 @@ export const ProblemSection: React.FC<ProblemSectionProps> = ({
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {problems.map((problem, index) => {
-            const Icon = icons[index % icons.length];
+            const Icon = problem.icon
+              ? getIconByName(problem.icon, defaultIcons[index % defaultIcons.length])
+              : defaultIcons[index % defaultIcons.length];
             return (
               <motion.div
                 key={index}

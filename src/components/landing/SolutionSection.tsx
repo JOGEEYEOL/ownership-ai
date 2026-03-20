@@ -3,12 +3,14 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Upload, Zap, Send } from 'lucide-react';
+import { getIconByName } from '@/lib/icon-map';
 
-const icons = [Upload, Zap, Send];
+const defaultIcons = [Upload, Zap, Send];
 
 interface SolutionItem {
   title: string;
   description: string;
+  icon?: string;
 }
 
 interface SolutionSectionProps {
@@ -65,7 +67,9 @@ export const SolutionSection: React.FC<SolutionSectionProps> = ({
             <div className="hidden lg:block absolute top-24 left-0 right-0 h-0.5 bg-gradient-to-r from-[var(--primary-blue)] via-[var(--primary-blue)] to-[var(--gradient-end)] opacity-20" />
 
             {steps.map((step, index) => {
-              const Icon = icons[index % icons.length];
+              const Icon = step.icon
+                ? getIconByName(step.icon, defaultIcons[index % defaultIcons.length])
+                : defaultIcons[index % defaultIcons.length];
               const number = String(index + 1).padStart(2, '0');
               return (
                 <motion.div

@@ -62,6 +62,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { SimpleRichTextEditor } from '@/components/editor/SimpleRichTextEditor';
+import { IconPicker } from '@/components/admin/IconPicker';
 
 // ─── Types ───────────────────────────────────────
 interface FAQ {
@@ -104,13 +105,19 @@ const settingsSchema = z.object({
   heroBadge: z.string(),
   problemTitle: z.string(),
   problemSubtitle: z.string(),
-  problems: z.array(z.object({ title: z.string(), description: z.string() })),
+  problems: z.array(
+    z.object({ title: z.string(), description: z.string(), icon: z.string().optional() })
+  ),
   solutionTitle: z.string(),
   solutionSubtitle: z.string(),
-  solutions: z.array(z.object({ title: z.string(), description: z.string() })),
+  solutions: z.array(
+    z.object({ title: z.string(), description: z.string(), icon: z.string().optional() })
+  ),
   featuresTitle: z.string(),
   featuresSubtitle: z.string(),
-  features: z.array(z.object({ title: z.string(), description: z.string() })),
+  features: z.array(
+    z.object({ title: z.string(), description: z.string(), icon: z.string().optional() })
+  ),
   impactTitle: z.string(),
   impactSubtitle: z.string(),
   impacts: z.array(
@@ -119,6 +126,7 @@ const settingsSchema = z.object({
       description: z.string(),
       metric: z.string(),
       metricLabel: z.string(),
+      icon: z.string().optional(),
     })
   ),
   testimonialTitle: z.string(),
@@ -170,16 +178,16 @@ export default function LandingSettingsPage() {
       heroBadge: '',
       problemTitle: '',
       problemSubtitle: '',
-      problems: [{ title: '', description: '' }],
+      problems: [{ title: '', description: '', icon: '' }],
       solutionTitle: '',
       solutionSubtitle: '',
-      solutions: [{ title: '', description: '' }],
+      solutions: [{ title: '', description: '', icon: '' }],
       featuresTitle: '',
       featuresSubtitle: '',
-      features: [{ title: '', description: '' }],
+      features: [{ title: '', description: '', icon: '' }],
       impactTitle: '',
       impactSubtitle: '',
-      impacts: [{ title: '', description: '', metric: '', metricLabel: '' }],
+      impacts: [{ title: '', description: '', metric: '', metricLabel: '', icon: '' }],
       testimonialTitle: '',
       testimonialSubtitle: '',
       authAppName: '',
@@ -234,19 +242,23 @@ export default function LandingSettingsPage() {
             heroBadge: map.get('landing_hero_badge') || '',
             problemTitle: map.get('landing_problem_title') || '',
             problemSubtitle: map.get('landing_problem_subtitle') || '',
-            problems: parseJsonArray(map.get('landing_problems'), [{ title: '', description: '' }]),
+            problems: parseJsonArray(map.get('landing_problems'), [
+              { title: '', description: '', icon: '' },
+            ]),
             solutionTitle: map.get('landing_solution_title') || '',
             solutionSubtitle: map.get('landing_solution_subtitle') || '',
             solutions: parseJsonArray(map.get('landing_solutions'), [
-              { title: '', description: '' },
+              { title: '', description: '', icon: '' },
             ]),
             featuresTitle: map.get('landing_features_title') || '',
             featuresSubtitle: map.get('landing_features_subtitle') || '',
-            features: parseJsonArray(map.get('landing_features'), [{ title: '', description: '' }]),
+            features: parseJsonArray(map.get('landing_features'), [
+              { title: '', description: '', icon: '' },
+            ]),
             impactTitle: map.get('landing_impact_title') || '',
             impactSubtitle: map.get('landing_impact_subtitle') || '',
             impacts: parseJsonArray(map.get('landing_impacts'), [
-              { title: '', description: '', metric: '', metricLabel: '' },
+              { title: '', description: '', metric: '', metricLabel: '', icon: '' },
             ]),
             testimonialTitle: map.get('landing_testimonial_title') || '',
             testimonialSubtitle: map.get('landing_testimonial_subtitle') || '',
@@ -824,15 +836,26 @@ export default function LandingSettingsPage() {
                                 </Button>
                               )}
                             </div>
-                            <Input
-                              value={item.title}
-                              placeholder="제목"
-                              onChange={e => {
-                                const u = [...field.value];
-                                u[index] = { ...u[index], title: e.target.value };
-                                field.onChange(u);
-                              }}
-                            />
+                            <div className="flex items-center gap-3">
+                              <IconPicker
+                                value={item.icon}
+                                onChange={iconName => {
+                                  const u = [...field.value];
+                                  u[index] = { ...u[index], icon: iconName };
+                                  field.onChange(u);
+                                }}
+                              />
+                              <Input
+                                value={item.title}
+                                placeholder="제목"
+                                className="flex-1"
+                                onChange={e => {
+                                  const u = [...field.value];
+                                  u[index] = { ...u[index], title: e.target.value };
+                                  field.onChange(u);
+                                }}
+                              />
+                            </div>
                             <Textarea
                               value={item.description}
                               placeholder="설명"
@@ -851,7 +874,7 @@ export default function LandingSettingsPage() {
                         variant="outline"
                         size="sm"
                         onClick={() =>
-                          field.onChange([...field.value, { title: '', description: '' }])
+                          field.onChange([...field.value, { title: '', description: '', icon: '' }])
                         }
                       >
                         <Plus className="w-4 h-4 mr-2" />
@@ -924,15 +947,26 @@ export default function LandingSettingsPage() {
                                 </Button>
                               )}
                             </div>
-                            <Input
-                              value={item.title}
-                              placeholder="제목"
-                              onChange={e => {
-                                const u = [...field.value];
-                                u[index] = { ...u[index], title: e.target.value };
-                                field.onChange(u);
-                              }}
-                            />
+                            <div className="flex items-center gap-3">
+                              <IconPicker
+                                value={item.icon}
+                                onChange={iconName => {
+                                  const u = [...field.value];
+                                  u[index] = { ...u[index], icon: iconName };
+                                  field.onChange(u);
+                                }}
+                              />
+                              <Input
+                                value={item.title}
+                                placeholder="제목"
+                                className="flex-1"
+                                onChange={e => {
+                                  const u = [...field.value];
+                                  u[index] = { ...u[index], title: e.target.value };
+                                  field.onChange(u);
+                                }}
+                              />
+                            </div>
                             <Textarea
                               value={item.description}
                               placeholder="설명"
@@ -951,7 +985,7 @@ export default function LandingSettingsPage() {
                         variant="outline"
                         size="sm"
                         onClick={() =>
-                          field.onChange([...field.value, { title: '', description: '' }])
+                          field.onChange([...field.value, { title: '', description: '', icon: '' }])
                         }
                       >
                         <Plus className="w-4 h-4 mr-2" />
@@ -1022,15 +1056,26 @@ export default function LandingSettingsPage() {
                                 </Button>
                               )}
                             </div>
-                            <Input
-                              value={item.title}
-                              placeholder="기능명"
-                              onChange={e => {
-                                const u = [...field.value];
-                                u[index] = { ...u[index], title: e.target.value };
-                                field.onChange(u);
-                              }}
-                            />
+                            <div className="flex items-center gap-3">
+                              <IconPicker
+                                value={item.icon}
+                                onChange={iconName => {
+                                  const u = [...field.value];
+                                  u[index] = { ...u[index], icon: iconName };
+                                  field.onChange(u);
+                                }}
+                              />
+                              <Input
+                                value={item.title}
+                                placeholder="기능명"
+                                className="flex-1"
+                                onChange={e => {
+                                  const u = [...field.value];
+                                  u[index] = { ...u[index], title: e.target.value };
+                                  field.onChange(u);
+                                }}
+                              />
+                            </div>
                             <Textarea
                               value={item.description}
                               placeholder="설명"
@@ -1049,7 +1094,7 @@ export default function LandingSettingsPage() {
                         variant="outline"
                         size="sm"
                         onClick={() =>
-                          field.onChange([...field.value, { title: '', description: '' }])
+                          field.onChange([...field.value, { title: '', description: '', icon: '' }])
                         }
                       >
                         <Plus className="w-4 h-4 mr-2" />
@@ -1120,6 +1165,26 @@ export default function LandingSettingsPage() {
                                 </Button>
                               )}
                             </div>
+                            <div className="flex items-center gap-3">
+                              <IconPicker
+                                value={item.icon}
+                                onChange={iconName => {
+                                  const u = [...field.value];
+                                  u[index] = { ...u[index], icon: iconName };
+                                  field.onChange(u);
+                                }}
+                              />
+                              <Input
+                                value={item.title}
+                                placeholder="제목"
+                                className="flex-1"
+                                onChange={e => {
+                                  const u = [...field.value];
+                                  u[index] = { ...u[index], title: e.target.value };
+                                  field.onChange(u);
+                                }}
+                              />
+                            </div>
                             <div className="grid grid-cols-2 gap-3">
                               <Input
                                 value={item.metric}
@@ -1140,15 +1205,6 @@ export default function LandingSettingsPage() {
                                 }}
                               />
                             </div>
-                            <Input
-                              value={item.title}
-                              placeholder="제목"
-                              onChange={e => {
-                                const u = [...field.value];
-                                u[index] = { ...u[index], title: e.target.value };
-                                field.onChange(u);
-                              }}
-                            />
                             <Textarea
                               value={item.description}
                               placeholder="설명"
@@ -1169,7 +1225,7 @@ export default function LandingSettingsPage() {
                         onClick={() =>
                           field.onChange([
                             ...field.value,
-                            { title: '', description: '', metric: '', metricLabel: '' },
+                            { title: '', description: '', metric: '', metricLabel: '', icon: '' },
                           ])
                         }
                       >

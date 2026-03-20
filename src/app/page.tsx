@@ -81,13 +81,16 @@ export default async function HomePage() {
     }
   };
 
-  const problems = parseJson<{ title: string; description: string }[]>('landing_problems');
-  const solutions = parseJson<{ title: string; description: string }[]>('landing_solutions');
-  const features = parseJson<{ title: string; description: string }[]>('landing_features');
+  const problems =
+    parseJson<{ title: string; description: string; icon?: string }[]>('landing_problems');
+  const solutions =
+    parseJson<{ title: string; description: string; icon?: string }[]>('landing_solutions');
+  const features =
+    parseJson<{ title: string; description: string; icon?: string }[]>('landing_features');
   const impacts =
-    parseJson<{ title: string; description: string; metric: string; metricLabel: string }[]>(
-      'landing_impacts'
-    );
+    parseJson<
+      { title: string; description: string; metric: string; metricLabel: string; icon?: string }[]
+    >('landing_impacts');
 
   // 연락처 정보 파싱 (플로팅 버튼과 동일한 데이터)
   let contacts: { name?: string; position?: string; email: string }[] = [];
