@@ -92,7 +92,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Users Card */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -150,8 +150,8 @@ export default async function AdminDashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Invitations Card */}
-        <Card>
+        {/* TODO: 메일링 시스템 도입 후 복원 */}
+        {/* <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-gray-600">초대 신청</CardTitle>
             <Mail className="w-5 h-5 text-[#0052CC]" />
@@ -160,7 +160,7 @@ export default async function AdminDashboardPage() {
             <div className="text-3xl font-bold text-gray-900">{stats.invitationsCount}</div>
             <p className="text-xs text-gray-500 mt-2">대기 중인 초대</p>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
       {/* Quick Actions */}
@@ -170,7 +170,7 @@ export default async function AdminDashboardPage() {
           <CardDescription>자주 사용하는 관리 기능</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <a
               href="/admin/users"
               className="p-4 border border-gray-200 rounded-lg hover:border-[#0052CC] hover:bg-blue-50 transition-colors"
@@ -189,14 +189,15 @@ export default async function AdminDashboardPage() {
               <p className="text-sm text-gray-600 mt-1">비디오, 노하우, 자료 관리</p>
             </a>
 
-            <a
+            {/* TODO: 메일링 시스템 도입 후 복원 */}
+            {/* <a
               href="/admin/invitations"
               className="p-4 border border-gray-200 rounded-lg hover:border-[#0052CC] hover:bg-blue-50 transition-colors"
             >
               <Mail className="w-8 h-8 text-[#0052CC] mb-2" />
               <h3 className="font-semibold text-gray-900">초대 승인</h3>
               <p className="text-sm text-gray-600 mt-1">신규 사용자 초대 승인</p>
-            </a>
+            </a> */}
           </div>
         </CardContent>
       </Card>

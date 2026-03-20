@@ -63,11 +63,12 @@ const menuItems: MenuItem[] = [
       },
     ],
   },
-  {
-    label: '초대 관리',
-    href: '/admin/invitations',
-    icon: Mail,
-  },
+  // TODO: 메일링 시스템 도입 후 복원
+  // {
+  //   label: '초대 관리',
+  //   href: '/admin/invitations',
+  //   icon: Mail,
+  // },
   {
     label: '설정',
     href: '#settings', // 드롭다운 전용 (페이지 없음)

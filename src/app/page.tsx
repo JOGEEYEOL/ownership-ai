@@ -19,8 +19,9 @@ export default function HomePage() {
       <ImpactSection />
       <SocialProofSection />
       <FAQSection />
-      <FinalCTASection />
-      <InvitationForm />
+      {/* TODO: 메일링 시스템 도입 후 복원 */}
+      {/* <FinalCTASection /> */}
+      {/* <InvitationForm /> */}
       <Footer />
     </main>
   );

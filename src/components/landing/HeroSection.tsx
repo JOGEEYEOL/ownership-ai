@@ -67,7 +67,7 @@ export const HeroSection: React.FC = () => {
             transition={{ duration: 1, delay: 0.6 }}
             className="mt-12 text-blue-100 text-sm"
           >
-            초대 기반 서비스 • 베타 테스터 모집 중
+            베타 서비스 운영 중
           </motion.div>
         </motion.div>
       </div>
