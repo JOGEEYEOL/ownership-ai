@@ -6,8 +6,21 @@ import { supabaseAdmin } from '@/lib/supabase/admin';
  * Admin Dashboard - 통계 및 요약 정보
  */
 export default async function AdminDashboardPage() {
-  // 통계 데이터 수집 (순차 실행으로 connection pool 타임아웃 방지)
-  const usersResult = await supabaseAdmin.auth.admin.listUsers();
+  // 통계 데이터 수집 - 전체 사용자 페이지네이션 조회
+  const allUsers: { id: string }[] = [];
+  let page = 1;
+  const perPage = 100;
+  let hasMore = true;
+  while (hasMore) {
+    const { data } = await supabaseAdmin.auth.admin.listUsers({ page, perPage });
+    if (data.users.length > 0) {
+      allUsers.push(...data.users.map(u => ({ id: u.id })));
+      page++;
+    }
+    if (data.users.length < perPage) {
+      hasMore = false;
+    }
+  }
 
   // 역할별 사용자 수 조회 (user_roles + roles 테이블 기반)
   const { data: roleStats } = await supabaseAdmin
@@ -38,7 +51,7 @@ export default async function AdminDashboardPage() {
     .from('invitations')
     .select('*', { count: 'exact', head: true });
 
-  const users = usersResult.data.users || [];
+  const users = allUsers;
 
   // 역할별 사용자 수 계산 (동적으로 모든 역할 표시)
   const roleCountList: { name: string; displayName: string; count: number }[] = [];
