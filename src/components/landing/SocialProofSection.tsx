@@ -61,10 +61,10 @@ const columnClassMap: Record<number, string> = {
   4: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4',
 };
 
-const slideBasisMap: Record<number, string> = {
-  2: 'md:basis-1/2',
-  3: 'md:basis-1/2 lg:basis-1/3',
-  4: 'md:basis-1/2 lg:basis-1/4',
+const slideStyleMap: Record<number, { flexBasis: string }> = {
+  2: { flexBasis: '50%' },
+  3: { flexBasis: '33.3333%' },
+  4: { flexBasis: '25%' },
 };
 
 export const SocialProofSection: React.FC<SocialProofSectionProps> = ({
@@ -101,11 +101,15 @@ export const SocialProofSection: React.FC<SocialProofSectionProps> = ({
         </div>
 
         {layout === 'slide' ? (
-          <div className="max-w-6xl mx-auto">
-            <Carousel opts={{ align: 'start', loop: true }} className="w-full">
+          <div className="max-w-6xl mx-auto overflow-hidden">
+            <Carousel opts={{ align: 'start', loop: true, slidesToScroll: 1 }} className="w-full">
               <CarouselContent className="-ml-6">
                 {testimonials.map(testimonial => (
-                  <CarouselItem key={testimonial.name} className={`pl-6 ${slideBasisMap[cols]}`}>
+                  <CarouselItem
+                    key={testimonial.name}
+                    className="pl-6 min-w-0 shrink-0 grow-0"
+                    style={slideStyleMap[cols]}
+                  >
                     <div className="h-full">
                       <TestimonialCard testimonial={testimonial} />
                     </div>
