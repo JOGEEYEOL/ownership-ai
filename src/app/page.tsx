@@ -26,6 +26,10 @@ export default async function HomePage() {
         'landing_trust_metrics',
         'landing_testimonial_layout',
         'landing_testimonial_columns',
+        'landing_problems',
+        'landing_solutions',
+        'landing_features',
+        'landing_impacts',
         'contact_phone',
         'contact_emails',
       ]),
@@ -53,6 +57,26 @@ export default async function HomePage() {
     /* use default */
   }
 
+  // 섹션 데이터 파싱
+  const parseJson = <T,>(key: string): T | undefined => {
+    try {
+      const raw = settingsMap.get(key);
+      if (!raw) return undefined;
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) && parsed.length > 0 ? (parsed as T) : undefined;
+    } catch {
+      return undefined;
+    }
+  };
+
+  const problems = parseJson<{ title: string; description: string }[]>('landing_problems');
+  const solutions = parseJson<{ title: string; description: string }[]>('landing_solutions');
+  const features = parseJson<{ title: string; description: string }[]>('landing_features');
+  const impacts =
+    parseJson<{ title: string; description: string; metric: string; metricLabel: string }[]>(
+      'landing_impacts'
+    );
+
   // 연락처 정보 파싱 (플로팅 버튼과 동일한 데이터)
   let contacts: { name?: string; position?: string; email: string }[] = [];
   try {
@@ -72,10 +96,10 @@ export default async function HomePage() {
         ctaSecondary={settingsMap.get('landing_hero_cta_secondary')}
         badgeText={settingsMap.get('landing_hero_badge')}
       />
-      <ProblemSection />
-      <SolutionSection />
-      <FeaturesSection />
-      <ImpactSection />
+      <ProblemSection items={problems} />
+      <SolutionSection items={solutions} />
+      <FeaturesSection items={features} />
+      <ImpactSection items={impacts} />
       <SocialProofSection
         testimonials={testimonialsRes.data || []}
         trustMetrics={trustMetrics}

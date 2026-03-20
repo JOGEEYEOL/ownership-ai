@@ -19,6 +19,10 @@ import {
   Globe,
   Search,
   LogIn,
+  AlertCircle,
+  Lightbulb,
+  LayoutGrid,
+  TrendingUp,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -98,6 +102,17 @@ const settingsSchema = z.object({
   heroCtaPrimary: z.string(),
   heroCtaSecondary: z.string(),
   heroBadge: z.string(),
+  problems: z.array(z.object({ title: z.string(), description: z.string() })),
+  solutions: z.array(z.object({ title: z.string(), description: z.string() })),
+  features: z.array(z.object({ title: z.string(), description: z.string() })),
+  impacts: z.array(
+    z.object({
+      title: z.string(),
+      description: z.string(),
+      metric: z.string(),
+      metricLabel: z.string(),
+    })
+  ),
   authAppName: z.string(),
   authAppTagline: z.string(),
   testimonialLayout: z.enum(['grid', 'slide']),
@@ -141,6 +156,10 @@ export default function LandingSettingsPage() {
       heroCtaPrimary: '',
       heroCtaSecondary: '',
       heroBadge: '',
+      problems: [{ title: '', description: '' }],
+      solutions: [{ title: '', description: '' }],
+      features: [{ title: '', description: '' }],
+      impacts: [{ title: '', description: '', metric: '', metricLabel: '' }],
       authAppName: '',
       authAppTagline: '',
       testimonialLayout: 'grid' as const,
@@ -152,6 +171,16 @@ export default function LandingSettingsPage() {
       trustMetrics: [{ value: '', label: '' }],
     },
   });
+
+  const parseJsonArray = <T,>(raw: string | undefined, fallback: T[]): T[] => {
+    if (!raw) return fallback;
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) && parsed.length > 0 ? parsed : fallback;
+    } catch {
+      return fallback;
+    }
+  };
 
   // 설정 불러오기
   useEffect(() => {
@@ -179,6 +208,14 @@ export default function LandingSettingsPage() {
             heroCtaPrimary: map.get('landing_hero_cta_primary') || '',
             heroCtaSecondary: map.get('landing_hero_cta_secondary') || '',
             heroBadge: map.get('landing_hero_badge') || '',
+            problems: parseJsonArray(map.get('landing_problems'), [{ title: '', description: '' }]),
+            solutions: parseJsonArray(map.get('landing_solutions'), [
+              { title: '', description: '' },
+            ]),
+            features: parseJsonArray(map.get('landing_features'), [{ title: '', description: '' }]),
+            impacts: parseJsonArray(map.get('landing_impacts'), [
+              { title: '', description: '', metric: '', metricLabel: '' },
+            ]),
             authAppName: map.get('auth_app_name') || '',
             authAppTagline: map.get('auth_app_tagline') || '',
             testimonialLayout: (map.get('landing_testimonial_layout') || 'grid') as
@@ -216,6 +253,13 @@ export default function LandingSettingsPage() {
         { key: 'landing_hero_cta_primary', value: formData.heroCtaPrimary },
         { key: 'landing_hero_cta_secondary', value: formData.heroCtaSecondary },
         { key: 'landing_hero_badge', value: formData.heroBadge },
+        { key: 'landing_problems', value: JSON.stringify(formData.problems.filter(p => p.title)) },
+        {
+          key: 'landing_solutions',
+          value: JSON.stringify(formData.solutions.filter(s => s.title)),
+        },
+        { key: 'landing_features', value: JSON.stringify(formData.features.filter(f => f.title)) },
+        { key: 'landing_impacts', value: JSON.stringify(formData.impacts.filter(i => i.title)) },
         { key: 'auth_app_name', value: formData.authAppName },
         { key: 'auth_app_tagline', value: formData.authAppTagline },
         { key: 'landing_testimonial_layout', value: formData.testimonialLayout },
@@ -670,6 +714,355 @@ export default function LandingSettingsPage() {
                     />
                   </CardContent>
                 </Card>
+              </AccordionContent>
+            </AccordionItem>
+          </div>
+
+          {/* ─── Problem 섹션 ─────────────── */}
+          <div className="border rounded-lg bg-white overflow-hidden">
+            <AccordionItem value="problems" className="border-0">
+              <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-gray-100 rounded-lg">
+                    <AlertCircle className="w-5 h-5 text-gray-500" />
+                  </div>
+                  <div className="text-left">
+                    <h2 className="text-lg font-semibold text-gray-900">문제점 섹션</h2>
+                    <p className="text-sm text-gray-500 font-normal">
+                      &quot;이런 어려움을 겪고 계신가요?&quot; 영역의 카드를 관리합니다.
+                    </p>
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6">
+                <Controller
+                  name="problems"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="space-y-4">
+                      {field.value.map((item, index) => (
+                        <Card key={index}>
+                          <CardContent className="p-4 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <Label className="text-sm font-medium">항목 {index + 1}</Label>
+                              {field.value.length > 1 && (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() =>
+                                    field.onChange(field.value.filter((_, i) => i !== index))
+                                  }
+                                  className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              )}
+                            </div>
+                            <Input
+                              value={item.title}
+                              placeholder="제목"
+                              onChange={e => {
+                                const u = [...field.value];
+                                u[index] = { ...u[index], title: e.target.value };
+                                field.onChange(u);
+                              }}
+                            />
+                            <Textarea
+                              value={item.description}
+                              placeholder="설명"
+                              rows={2}
+                              onChange={e => {
+                                const u = [...field.value];
+                                u[index] = { ...u[index], description: e.target.value };
+                                field.onChange(u);
+                              }}
+                            />
+                          </CardContent>
+                        </Card>
+                      ))}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          field.onChange([...field.value, { title: '', description: '' }])
+                        }
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        항목 추가
+                      </Button>
+                    </div>
+                  )}
+                />
+              </AccordionContent>
+            </AccordionItem>
+          </div>
+
+          {/* ─── Solution 섹션 ────────────── */}
+          <div className="border rounded-lg bg-white overflow-hidden">
+            <AccordionItem value="solutions" className="border-0">
+              <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-gray-100 rounded-lg">
+                    <Lightbulb className="w-5 h-5 text-gray-500" />
+                  </div>
+                  <div className="text-left">
+                    <h2 className="text-lg font-semibold text-gray-900">해결 방법 섹션</h2>
+                    <p className="text-sm text-gray-500 font-normal">
+                      &quot;이렇게 간단하게 해결됩니다&quot; 영역의 단계를 관리합니다.
+                    </p>
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6">
+                <Controller
+                  name="solutions"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="space-y-4">
+                      {field.value.map((item, index) => (
+                        <Card key={index}>
+                          <CardContent className="p-4 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <Label className="text-sm font-medium">
+                                Step {String(index + 1).padStart(2, '0')}
+                              </Label>
+                              {field.value.length > 1 && (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() =>
+                                    field.onChange(field.value.filter((_, i) => i !== index))
+                                  }
+                                  className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              )}
+                            </div>
+                            <Input
+                              value={item.title}
+                              placeholder="제목"
+                              onChange={e => {
+                                const u = [...field.value];
+                                u[index] = { ...u[index], title: e.target.value };
+                                field.onChange(u);
+                              }}
+                            />
+                            <Textarea
+                              value={item.description}
+                              placeholder="설명"
+                              rows={2}
+                              onChange={e => {
+                                const u = [...field.value];
+                                u[index] = { ...u[index], description: e.target.value };
+                                field.onChange(u);
+                              }}
+                            />
+                          </CardContent>
+                        </Card>
+                      ))}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          field.onChange([...field.value, { title: '', description: '' }])
+                        }
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        단계 추가
+                      </Button>
+                    </div>
+                  )}
+                />
+              </AccordionContent>
+            </AccordionItem>
+          </div>
+
+          {/* ─── Features 섹션 ────────────── */}
+          <div className="border rounded-lg bg-white overflow-hidden">
+            <AccordionItem value="features" className="border-0">
+              <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-gray-100 rounded-lg">
+                    <LayoutGrid className="w-5 h-5 text-gray-500" />
+                  </div>
+                  <div className="text-left">
+                    <h2 className="text-lg font-semibold text-gray-900">핵심 기능 섹션</h2>
+                    <p className="text-sm text-gray-500 font-normal">
+                      &quot;핵심 기능&quot; 영역의 기능 카드를 관리합니다.
+                    </p>
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6">
+                <Controller
+                  name="features"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="space-y-4">
+                      {field.value.map((item, index) => (
+                        <Card key={index}>
+                          <CardContent className="p-4 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <Label className="text-sm font-medium">기능 {index + 1}</Label>
+                              {field.value.length > 1 && (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() =>
+                                    field.onChange(field.value.filter((_, i) => i !== index))
+                                  }
+                                  className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              )}
+                            </div>
+                            <Input
+                              value={item.title}
+                              placeholder="기능명"
+                              onChange={e => {
+                                const u = [...field.value];
+                                u[index] = { ...u[index], title: e.target.value };
+                                field.onChange(u);
+                              }}
+                            />
+                            <Textarea
+                              value={item.description}
+                              placeholder="설명"
+                              rows={2}
+                              onChange={e => {
+                                const u = [...field.value];
+                                u[index] = { ...u[index], description: e.target.value };
+                                field.onChange(u);
+                              }}
+                            />
+                          </CardContent>
+                        </Card>
+                      ))}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          field.onChange([...field.value, { title: '', description: '' }])
+                        }
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        기능 추가
+                      </Button>
+                    </div>
+                  )}
+                />
+              </AccordionContent>
+            </AccordionItem>
+          </div>
+
+          {/* ─── Impact 섹션 ──────────────── */}
+          <div className="border rounded-lg bg-white overflow-hidden">
+            <AccordionItem value="impacts" className="border-0">
+              <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-gray-100 rounded-lg">
+                    <TrendingUp className="w-5 h-5 text-gray-500" />
+                  </div>
+                  <div className="text-left">
+                    <h2 className="text-lg font-semibold text-gray-900">효과/성과 섹션</h2>
+                    <p className="text-sm text-gray-500 font-normal">
+                      &quot;실제로 경험하는 변화&quot; 영역의 성과 카드를 관리합니다.
+                    </p>
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6">
+                <Controller
+                  name="impacts"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="space-y-4">
+                      {field.value.map((item, index) => (
+                        <Card key={index}>
+                          <CardContent className="p-4 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <Label className="text-sm font-medium">성과 {index + 1}</Label>
+                              {field.value.length > 1 && (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() =>
+                                    field.onChange(field.value.filter((_, i) => i !== index))
+                                  }
+                                  className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              )}
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                              <Input
+                                value={item.metric}
+                                placeholder="수치 (예: 평균 30%)"
+                                onChange={e => {
+                                  const u = [...field.value];
+                                  u[index] = { ...u[index], metric: e.target.value };
+                                  field.onChange(u);
+                                }}
+                              />
+                              <Input
+                                value={item.metricLabel}
+                                placeholder="수치 라벨 (예: 매출 증가)"
+                                onChange={e => {
+                                  const u = [...field.value];
+                                  u[index] = { ...u[index], metricLabel: e.target.value };
+                                  field.onChange(u);
+                                }}
+                              />
+                            </div>
+                            <Input
+                              value={item.title}
+                              placeholder="제목"
+                              onChange={e => {
+                                const u = [...field.value];
+                                u[index] = { ...u[index], title: e.target.value };
+                                field.onChange(u);
+                              }}
+                            />
+                            <Textarea
+                              value={item.description}
+                              placeholder="설명"
+                              rows={2}
+                              onChange={e => {
+                                const u = [...field.value];
+                                u[index] = { ...u[index], description: e.target.value };
+                                field.onChange(u);
+                              }}
+                            />
+                          </CardContent>
+                        </Card>
+                      ))}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          field.onChange([
+                            ...field.value,
+                            { title: '', description: '', metric: '', metricLabel: '' },
+                          ])
+                        }
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        성과 추가
+                      </Button>
+                    </div>
+                  )}
+                />
               </AccordionContent>
             </AccordionItem>
           </div>

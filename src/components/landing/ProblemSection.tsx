@@ -5,27 +5,39 @@ import { motion } from 'framer-motion';
 import { AlertCircle, Clock, FileX } from 'lucide-react';
 import { Card } from '../common/Card';
 
-const problems = [
-  {
-    icon: FileX,
-    title: '흩어진 고객 정보',
-    description: '엑셀, 메모장, 이메일에 흩어진 고객 정보로 인해 중요한 기회를 놓치고 계신가요?',
-  },
-  {
-    icon: Clock,
-    title: '수동 검색의 비효율',
-    description:
-      '매번 정부지원사업 공고를 일일이 찾아보고, 고객에게 맞는지 판단하는 데 시간을 낭비하고 있나요?',
-  },
-  {
-    icon: AlertCircle,
-    title: '놓치는 매칭 기회',
-    description:
-      '고객에게 딱 맞는 지원사업이 있었는데, 뒤늦게 발견해서 아쉬워한 경험이 있으신가요?',
-  },
-];
+const icons = [FileX, Clock, AlertCircle];
 
-export const ProblemSection: React.FC = () => {
+interface ProblemItem {
+  title: string;
+  description: string;
+}
+
+interface ProblemSectionProps {
+  items?: ProblemItem[];
+}
+
+export const ProblemSection: React.FC<ProblemSectionProps> = ({ items }) => {
+  const problems =
+    items && items.length > 0
+      ? items
+      : [
+          {
+            title: '흩어진 고객 정보',
+            description:
+              '엑셀, 메모장, 이메일에 흩어진 고객 정보로 인해 중요한 기회를 놓치고 계신가요?',
+          },
+          {
+            title: '수동 검색의 비효율',
+            description:
+              '매번 정부지원사업 공고를 일일이 찾아보고, 고객에게 맞는지 판단하는 데 시간을 낭비하고 있나요?',
+          },
+          {
+            title: '놓치는 매칭 기회',
+            description:
+              '고객에게 딱 맞는 지원사업이 있었는데, 뒤늦게 발견해서 아쉬워한 경험이 있으신가요?',
+          },
+        ];
+
   return (
     <section className="py-20 bg-[var(--bg-gray-50)]">
       <div className="container mx-auto px-4">
@@ -50,27 +62,30 @@ export const ProblemSection: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {problems.map((problem, index) => (
-            <motion.div
-              key={problem.title}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-            >
-              <Card hover className="h-full p-8 text-center">
-                <div className="w-16 h-16 mx-auto mb-6 bg-red-100 rounded-full flex items-center justify-center">
-                  <problem.icon className="w-8 h-8 text-red-600" />
-                </div>
-                <h3 className="text-xl font-bold text-[var(--text-primary)] mb-4">
-                  {problem.title}
-                </h3>
-                <p className="text-[var(--text-secondary)] leading-relaxed">
-                  {problem.description}
-                </p>
-              </Card>
-            </motion.div>
-          ))}
+          {problems.map((problem, index) => {
+            const Icon = icons[index % icons.length];
+            return (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                <Card hover className="h-full p-8 text-center">
+                  <div className="w-16 h-16 mx-auto mb-6 bg-red-100 rounded-full flex items-center justify-center">
+                    <Icon className="w-8 h-8 text-red-600" />
+                  </div>
+                  <h3 className="text-xl font-bold text-[var(--text-primary)] mb-4">
+                    {problem.title}
+                  </h3>
+                  <p className="text-[var(--text-secondary)] leading-relaxed">
+                    {problem.description}
+                  </p>
+                </Card>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>
