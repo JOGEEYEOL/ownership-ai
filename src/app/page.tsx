@@ -16,6 +16,11 @@ export default async function HomePage() {
       .select('key, value')
       .in('key', [
         'landing_hero_badge',
+        'landing_hero_title_1',
+        'landing_hero_title_2',
+        'landing_hero_subtitle',
+        'landing_hero_cta_primary',
+        'landing_hero_cta_secondary',
         'landing_footer_company_name',
         'landing_footer_description',
         'landing_trust_metrics',
@@ -57,7 +62,14 @@ export default async function HomePage() {
 
   return (
     <main>
-      <HeroSection badgeText={settingsMap.get('landing_hero_badge') || '베타 서비스 운영 중'} />
+      <HeroSection
+        title1={settingsMap.get('landing_hero_title_1')}
+        title2={settingsMap.get('landing_hero_title_2')}
+        subtitle={settingsMap.get('landing_hero_subtitle')}
+        ctaPrimary={settingsMap.get('landing_hero_cta_primary')}
+        ctaSecondary={settingsMap.get('landing_hero_cta_secondary')}
+        badgeText={settingsMap.get('landing_hero_badge')}
+      />
       <ProblemSection />
       <SolutionSection />
       <FeaturesSection />

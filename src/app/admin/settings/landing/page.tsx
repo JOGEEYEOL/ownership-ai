@@ -18,6 +18,8 @@ import {
   BarChart3,
   FileText,
   Globe,
+  Search,
+  LogIn,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -82,7 +84,16 @@ interface SiteSetting {
 
 // ─── Settings Form Schema ────────────────────────
 const settingsSchema = z.object({
+  siteTitle: z.string(),
+  siteDescription: z.string(),
+  heroTitle1: z.string(),
+  heroTitle2: z.string(),
+  heroSubtitle: z.string(),
+  heroCtaPrimary: z.string(),
+  heroCtaSecondary: z.string(),
   heroBadge: z.string(),
+  authAppName: z.string(),
+  authAppTagline: z.string(),
   footerCompanyName: z.string(),
   footerDescription: z.string(),
   privacyPolicy: z.string(),
@@ -114,7 +125,16 @@ export default function LandingSettingsPage() {
   } = useForm<SettingsForm>({
     resolver: zodResolver(settingsSchema),
     defaultValues: {
+      siteTitle: '',
+      siteDescription: '',
+      heroTitle1: '',
+      heroTitle2: '',
+      heroSubtitle: '',
+      heroCtaPrimary: '',
+      heroCtaSecondary: '',
       heroBadge: '',
+      authAppName: '',
+      authAppTagline: '',
       footerCompanyName: '',
       footerDescription: '',
       privacyPolicy: '',
@@ -141,7 +161,16 @@ export default function LandingSettingsPage() {
           }
 
           reset({
+            siteTitle: map.get('site_title') || '',
+            siteDescription: map.get('site_description') || '',
+            heroTitle1: map.get('landing_hero_title_1') || '',
+            heroTitle2: map.get('landing_hero_title_2') || '',
+            heroSubtitle: map.get('landing_hero_subtitle') || '',
+            heroCtaPrimary: map.get('landing_hero_cta_primary') || '',
+            heroCtaSecondary: map.get('landing_hero_cta_secondary') || '',
             heroBadge: map.get('landing_hero_badge') || '',
+            authAppName: map.get('auth_app_name') || '',
+            authAppTagline: map.get('auth_app_tagline') || '',
             footerCompanyName: map.get('landing_footer_company_name') || '',
             footerDescription: map.get('landing_footer_description') || '',
             privacyPolicy: map.get('legal_privacy_policy') || '',
@@ -165,7 +194,16 @@ export default function LandingSettingsPage() {
       const validMetrics = formData.trustMetrics.filter(m => m.value && m.label);
 
       const settings = [
+        { key: 'site_title', value: formData.siteTitle },
+        { key: 'site_description', value: formData.siteDescription },
+        { key: 'landing_hero_title_1', value: formData.heroTitle1 },
+        { key: 'landing_hero_title_2', value: formData.heroTitle2 },
+        { key: 'landing_hero_subtitle', value: formData.heroSubtitle },
+        { key: 'landing_hero_cta_primary', value: formData.heroCtaPrimary },
+        { key: 'landing_hero_cta_secondary', value: formData.heroCtaSecondary },
         { key: 'landing_hero_badge', value: formData.heroBadge },
+        { key: 'auth_app_name', value: formData.authAppName },
+        { key: 'auth_app_tagline', value: formData.authAppTagline },
         { key: 'landing_footer_company_name', value: formData.footerCompanyName },
         { key: 'landing_footer_description', value: formData.footerDescription },
         { key: 'legal_privacy_policy', value: formData.privacyPolicy },
@@ -493,12 +531,65 @@ export default function LandingSettingsPage() {
                   <div className="text-left">
                     <h2 className="text-lg font-semibold text-gray-900">Hero 설정</h2>
                     <p className="text-sm text-gray-500 font-normal">
-                      메인 히어로 섹션의 배지 텍스트를 관리합니다.
+                      메인 히어로 섹션의 텍스트를 관리합니다.
                     </p>
                   </div>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="px-6 pb-6">
+              <AccordionContent className="px-6 pb-6 space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">메인 타이틀</CardTitle>
+                    <CardDescription>
+                      히어로 섹션의 대제목입니다. 두 줄로 표시됩니다.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div>
+                      <Label className="text-xs text-gray-500">첫번째 줄 (강조 색상)</Label>
+                      <Input
+                        {...register('heroTitle1')}
+                        placeholder="컨설턴트를 위한"
+                        className="max-w-md"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs text-gray-500">두번째 줄 (흰색)</Label>
+                      <Input
+                        {...register('heroTitle2')}
+                        placeholder="스마트한 고객 관리"
+                        className="max-w-md"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">서브타이틀</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Input
+                      {...register('heroSubtitle')}
+                      placeholder="정부지원사업을 자동으로 매칭하고, 고객에게 딱 맞는 기회를 추천하세요"
+                      className="max-w-lg"
+                    />
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">CTA 버튼</CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex gap-3">
+                    <div className="flex-1">
+                      <Label className="text-xs text-gray-500">메인 버튼</Label>
+                      <Input {...register('heroCtaPrimary')} placeholder="무료로 시작하기" />
+                    </div>
+                    <div className="flex-1">
+                      <Label className="text-xs text-gray-500">보조 버튼</Label>
+                      <Input {...register('heroCtaSecondary')} placeholder="로그인" />
+                    </div>
+                  </CardContent>
+                </Card>
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-base">배지 텍스트</CardTitle>
@@ -870,6 +961,106 @@ export default function LandingSettingsPage() {
                       연락처 설정 페이지에서 수정
                       <span aria-hidden>→</span>
                     </a>
+                  </CardContent>
+                </Card>
+              </AccordionContent>
+            </AccordionItem>
+          </div>
+
+          {/* ─── 메타데이터 설정 ───────────── */}
+          <div className="border rounded-lg bg-white overflow-hidden">
+            <AccordionItem value="metadata" className="border-0">
+              <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-gray-100 rounded-lg">
+                    <Search className="w-5 h-5 text-gray-500" />
+                  </div>
+                  <div className="text-left">
+                    <h2 className="text-lg font-semibold text-gray-900">메타데이터 설정</h2>
+                    <p className="text-sm text-gray-500 font-normal">
+                      브라우저 탭 제목, 검색엔진 노출 정보를 관리합니다.
+                    </p>
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6 space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">브라우저 탭 제목</CardTitle>
+                    <CardDescription>
+                      브라우저 탭과 검색 결과에 표시되는 사이트 제목입니다.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Input
+                      {...register('siteTitle')}
+                      placeholder="Ownership AI - 컨설턴트 관리 플랫폼"
+                      className="max-w-lg"
+                    />
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">사이트 설명</CardTitle>
+                    <CardDescription>
+                      검색 결과와 소셜 미디어 공유 시 표시되는 설명입니다.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Input
+                      {...register('siteDescription')}
+                      placeholder="1인 컨설턴트를 위한 고객 정보 관리 및 정부지원사업 매칭 SaaS 플랫폼"
+                      className="max-w-lg"
+                    />
+                  </CardContent>
+                </Card>
+              </AccordionContent>
+            </AccordionItem>
+          </div>
+
+          {/* ─── 로그인/회원가입 설정 ──────── */}
+          <div className="border rounded-lg bg-white overflow-hidden">
+            <AccordionItem value="auth" className="border-0">
+              <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-gray-100 rounded-lg">
+                    <LogIn className="w-5 h-5 text-gray-500" />
+                  </div>
+                  <div className="text-left">
+                    <h2 className="text-lg font-semibold text-gray-900">로그인/회원가입 설정</h2>
+                    <p className="text-sm text-gray-500 font-normal">
+                      로그인, 회원가입 페이지 상단 텍스트를 관리합니다.
+                    </p>
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6 space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">앱 이름</CardTitle>
+                    <CardDescription>
+                      로그인/회원가입 페이지 상단에 표시되는 이름입니다.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Input
+                      {...register('authAppName')}
+                      placeholder="Ownership AI"
+                      className="max-w-md"
+                    />
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">태그라인</CardTitle>
+                    <CardDescription>앱 이름 아래에 표시되는 한 줄 소개입니다.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Input
+                      {...register('authAppTagline')}
+                      placeholder="컨설턴트를 위한 스마트한 고객 관리"
+                      className="max-w-lg"
+                    />
                   </CardContent>
                 </Card>
               </AccordionContent>
