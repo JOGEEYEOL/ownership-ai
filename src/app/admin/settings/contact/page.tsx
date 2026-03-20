@@ -317,8 +317,8 @@ export default function ContactSettingsPage() {
             <AccordionItem value="company" className="border-0">
               <AccordionTrigger className="px-6 py-4 hover:no-underline">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-purple-100 rounded-lg">
-                    <Building2 className="w-5 h-5 text-purple-600" />
+                  <div className="p-2 bg-gray-100 rounded-lg">
+                    <Building2 className="w-5 h-5 text-gray-500" />
                   </div>
                   <div className="text-left">
                     <h2 className="text-lg font-semibold text-gray-900">회사 소개</h2>
@@ -434,8 +434,8 @@ export default function ContactSettingsPage() {
             <AccordionItem value="contact" className="border-0">
               <AccordionTrigger className="px-6 py-4 hover:no-underline">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-green-100 rounded-lg">
-                    <Phone className="w-5 h-5 text-green-600" />
+                  <div className="p-2 bg-gray-100 rounded-lg">
+                    <Phone className="w-5 h-5 text-gray-500" />
                   </div>
                   <div className="text-left">
                     <h2 className="text-lg font-semibold text-gray-900">연락처 정보</h2>
@@ -556,8 +556,8 @@ export default function ContactSettingsPage() {
             <AccordionItem value="links" className="border-0">
               <AccordionTrigger className="px-6 py-4 hover:no-underline">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <Link className="w-5 h-5 text-blue-600" />
+                  <div className="p-2 bg-gray-100 rounded-lg">
+                    <Link className="w-5 h-5 text-gray-500" />
                   </div>
                   <div className="text-left">
                     <h2 className="text-lg font-semibold text-gray-900">외부 링크</h2>

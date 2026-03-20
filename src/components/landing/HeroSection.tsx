@@ -5,7 +5,11 @@ import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '../common/Button';
 
-export const HeroSection: React.FC = () => {
+interface HeroSectionProps {
+  badgeText?: string;
+}
+
+export const HeroSection: React.FC<HeroSectionProps> = ({ badgeText = '베타 서비스 운영 중' }) => {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-[var(--primary-blue)] to-[var(--gradient-end)]">
       {/* Background Pattern */}
@@ -67,7 +71,7 @@ export const HeroSection: React.FC = () => {
             transition={{ duration: 1, delay: 0.6 }}
             className="mt-12 text-blue-100 text-sm"
           >
-            베타 서비스 운영 중
+            {badgeText}
           </motion.div>
         </motion.div>
       </div>

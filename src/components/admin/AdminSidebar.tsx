@@ -20,6 +20,7 @@ import {
   Tags,
   Copy,
   Phone,
+  Globe,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -88,6 +89,11 @@ const menuItems: MenuItem[] = [
         label: '탬플릿 관리',
         href: '/admin/settings/copy-templates',
         icon: Copy,
+      },
+      {
+        label: '랜딩페이지 관리',
+        href: '/admin/settings/landing',
+        icon: Globe,
       },
     ],
   },
