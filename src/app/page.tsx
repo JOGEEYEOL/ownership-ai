@@ -26,10 +26,22 @@ export default async function HomePage() {
         'landing_trust_metrics',
         'landing_testimonial_layout',
         'landing_testimonial_columns',
+        'landing_problem_title',
+        'landing_problem_subtitle',
         'landing_problems',
+        'landing_solution_title',
+        'landing_solution_subtitle',
         'landing_solutions',
+        'landing_features_title',
+        'landing_features_subtitle',
         'landing_features',
+        'landing_impact_title',
+        'landing_impact_subtitle',
         'landing_impacts',
+        'landing_testimonial_title',
+        'landing_testimonial_subtitle',
+        'landing_faq_title',
+        'landing_faq_subtitle',
         'contact_phone',
         'contact_emails',
       ]),
@@ -96,17 +108,39 @@ export default async function HomePage() {
         ctaSecondary={settingsMap.get('landing_hero_cta_secondary')}
         badgeText={settingsMap.get('landing_hero_badge')}
       />
-      <ProblemSection items={problems} />
-      <SolutionSection items={solutions} />
-      <FeaturesSection items={features} />
-      <ImpactSection items={impacts} />
+      <ProblemSection
+        items={problems}
+        sectionTitle={settingsMap.get('landing_problem_title')}
+        sectionSubtitle={settingsMap.get('landing_problem_subtitle')}
+      />
+      <SolutionSection
+        items={solutions}
+        sectionTitle={settingsMap.get('landing_solution_title')}
+        sectionSubtitle={settingsMap.get('landing_solution_subtitle')}
+      />
+      <FeaturesSection
+        items={features}
+        sectionTitle={settingsMap.get('landing_features_title')}
+        sectionSubtitle={settingsMap.get('landing_features_subtitle')}
+      />
+      <ImpactSection
+        items={impacts}
+        sectionTitle={settingsMap.get('landing_impact_title')}
+        sectionSubtitle={settingsMap.get('landing_impact_subtitle')}
+      />
       <SocialProofSection
         testimonials={testimonialsRes.data || []}
         trustMetrics={trustMetrics}
         layout={(settingsMap.get('landing_testimonial_layout') as 'grid' | 'slide') || 'grid'}
         columns={parseInt(settingsMap.get('landing_testimonial_columns') || '3', 10)}
+        sectionTitle={settingsMap.get('landing_testimonial_title')}
+        sectionSubtitle={settingsMap.get('landing_testimonial_subtitle')}
       />
-      <FAQSection faqs={faqsRes.data || []} />
+      <FAQSection
+        faqs={faqsRes.data || []}
+        sectionTitle={settingsMap.get('landing_faq_title')}
+        sectionSubtitle={settingsMap.get('landing_faq_subtitle')}
+      />
       {/* TODO: 메일링 시스템 도입 후 복원 */}
       {/* <FinalCTASection /> */}
       {/* <InvitationForm /> */}

@@ -102,9 +102,17 @@ const settingsSchema = z.object({
   heroCtaPrimary: z.string(),
   heroCtaSecondary: z.string(),
   heroBadge: z.string(),
+  problemTitle: z.string(),
+  problemSubtitle: z.string(),
   problems: z.array(z.object({ title: z.string(), description: z.string() })),
+  solutionTitle: z.string(),
+  solutionSubtitle: z.string(),
   solutions: z.array(z.object({ title: z.string(), description: z.string() })),
+  featuresTitle: z.string(),
+  featuresSubtitle: z.string(),
   features: z.array(z.object({ title: z.string(), description: z.string() })),
+  impactTitle: z.string(),
+  impactSubtitle: z.string(),
   impacts: z.array(
     z.object({
       title: z.string(),
@@ -113,10 +121,14 @@ const settingsSchema = z.object({
       metricLabel: z.string(),
     })
   ),
+  testimonialTitle: z.string(),
+  testimonialSubtitle: z.string(),
   authAppName: z.string(),
   authAppTagline: z.string(),
   testimonialLayout: z.enum(['grid', 'slide']),
   testimonialColumns: z.string(),
+  faqTitle: z.string(),
+  faqSubtitle: z.string(),
   footerCompanyName: z.string(),
   footerDescription: z.string(),
   privacyPolicy: z.string(),
@@ -156,14 +168,26 @@ export default function LandingSettingsPage() {
       heroCtaPrimary: '',
       heroCtaSecondary: '',
       heroBadge: '',
+      problemTitle: '',
+      problemSubtitle: '',
       problems: [{ title: '', description: '' }],
+      solutionTitle: '',
+      solutionSubtitle: '',
       solutions: [{ title: '', description: '' }],
+      featuresTitle: '',
+      featuresSubtitle: '',
       features: [{ title: '', description: '' }],
+      impactTitle: '',
+      impactSubtitle: '',
       impacts: [{ title: '', description: '', metric: '', metricLabel: '' }],
+      testimonialTitle: '',
+      testimonialSubtitle: '',
       authAppName: '',
       authAppTagline: '',
       testimonialLayout: 'grid' as const,
       testimonialColumns: '3',
+      faqTitle: '',
+      faqSubtitle: '',
       footerCompanyName: '',
       footerDescription: '',
       privacyPolicy: '',
@@ -208,20 +232,32 @@ export default function LandingSettingsPage() {
             heroCtaPrimary: map.get('landing_hero_cta_primary') || '',
             heroCtaSecondary: map.get('landing_hero_cta_secondary') || '',
             heroBadge: map.get('landing_hero_badge') || '',
+            problemTitle: map.get('landing_problem_title') || '',
+            problemSubtitle: map.get('landing_problem_subtitle') || '',
             problems: parseJsonArray(map.get('landing_problems'), [{ title: '', description: '' }]),
+            solutionTitle: map.get('landing_solution_title') || '',
+            solutionSubtitle: map.get('landing_solution_subtitle') || '',
             solutions: parseJsonArray(map.get('landing_solutions'), [
               { title: '', description: '' },
             ]),
+            featuresTitle: map.get('landing_features_title') || '',
+            featuresSubtitle: map.get('landing_features_subtitle') || '',
             features: parseJsonArray(map.get('landing_features'), [{ title: '', description: '' }]),
+            impactTitle: map.get('landing_impact_title') || '',
+            impactSubtitle: map.get('landing_impact_subtitle') || '',
             impacts: parseJsonArray(map.get('landing_impacts'), [
               { title: '', description: '', metric: '', metricLabel: '' },
             ]),
+            testimonialTitle: map.get('landing_testimonial_title') || '',
+            testimonialSubtitle: map.get('landing_testimonial_subtitle') || '',
             authAppName: map.get('auth_app_name') || '',
             authAppTagline: map.get('auth_app_tagline') || '',
             testimonialLayout: (map.get('landing_testimonial_layout') || 'grid') as
               | 'grid'
               | 'slide',
             testimonialColumns: map.get('landing_testimonial_columns') || '3',
+            faqTitle: map.get('landing_faq_title') || '',
+            faqSubtitle: map.get('landing_faq_subtitle') || '',
             footerCompanyName: map.get('landing_footer_company_name') || '',
             footerDescription: map.get('landing_footer_description') || '',
             privacyPolicy: map.get('legal_privacy_policy') || '',
@@ -253,17 +289,29 @@ export default function LandingSettingsPage() {
         { key: 'landing_hero_cta_primary', value: formData.heroCtaPrimary },
         { key: 'landing_hero_cta_secondary', value: formData.heroCtaSecondary },
         { key: 'landing_hero_badge', value: formData.heroBadge },
+        { key: 'landing_problem_title', value: formData.problemTitle },
+        { key: 'landing_problem_subtitle', value: formData.problemSubtitle },
         { key: 'landing_problems', value: JSON.stringify(formData.problems.filter(p => p.title)) },
+        { key: 'landing_solution_title', value: formData.solutionTitle },
+        { key: 'landing_solution_subtitle', value: formData.solutionSubtitle },
         {
           key: 'landing_solutions',
           value: JSON.stringify(formData.solutions.filter(s => s.title)),
         },
+        { key: 'landing_features_title', value: formData.featuresTitle },
+        { key: 'landing_features_subtitle', value: formData.featuresSubtitle },
         { key: 'landing_features', value: JSON.stringify(formData.features.filter(f => f.title)) },
+        { key: 'landing_impact_title', value: formData.impactTitle },
+        { key: 'landing_impact_subtitle', value: formData.impactSubtitle },
         { key: 'landing_impacts', value: JSON.stringify(formData.impacts.filter(i => i.title)) },
+        { key: 'landing_testimonial_title', value: formData.testimonialTitle },
+        { key: 'landing_testimonial_subtitle', value: formData.testimonialSubtitle },
         { key: 'auth_app_name', value: formData.authAppName },
         { key: 'auth_app_tagline', value: formData.authAppTagline },
         { key: 'landing_testimonial_layout', value: formData.testimonialLayout },
         { key: 'landing_testimonial_columns', value: formData.testimonialColumns },
+        { key: 'landing_faq_title', value: formData.faqTitle },
+        { key: 'landing_faq_subtitle', value: formData.faqSubtitle },
         { key: 'landing_footer_company_name', value: formData.footerCompanyName },
         { key: 'landing_footer_description', value: formData.footerDescription },
         { key: 'legal_privacy_policy', value: formData.privacyPolicy },
@@ -734,7 +782,24 @@ export default function LandingSettingsPage() {
                   </div>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="px-6 pb-6">
+              <AccordionContent className="px-6 pb-6 space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">섹션 제목</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <Input
+                      {...register('problemTitle')}
+                      placeholder="이런 어려움을 겪고 계신가요?"
+                      className="max-w-lg"
+                    />
+                    <Input
+                      {...register('problemSubtitle')}
+                      placeholder="1인 컨설턴트가 겪는 가장 큰 문제들"
+                      className="max-w-lg"
+                    />
+                  </CardContent>
+                </Card>
                 <Controller
                   name="problems"
                   control={control}
@@ -815,7 +880,24 @@ export default function LandingSettingsPage() {
                   </div>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="px-6 pb-6">
+              <AccordionContent className="px-6 pb-6 space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">섹션 제목</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <Input
+                      {...register('solutionTitle')}
+                      placeholder="이렇게 간단하게 해결됩니다"
+                      className="max-w-lg"
+                    />
+                    <Input
+                      {...register('solutionSubtitle')}
+                      placeholder="3단계로 완성되는 스마트한 고객 관리"
+                      className="max-w-lg"
+                    />
+                  </CardContent>
+                </Card>
                 <Controller
                   name="solutions"
                   control={control}
@@ -898,7 +980,24 @@ export default function LandingSettingsPage() {
                   </div>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="px-6 pb-6">
+              <AccordionContent className="px-6 pb-6 space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">섹션 제목</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <Input
+                      {...register('featuresTitle')}
+                      placeholder="핵심 기능"
+                      className="max-w-lg"
+                    />
+                    <Input
+                      {...register('featuresSubtitle')}
+                      placeholder="컨설턴트가 정말 필요한 기능만 담았습니다"
+                      className="max-w-lg"
+                    />
+                  </CardContent>
+                </Card>
                 <Controller
                   name="features"
                   control={control}
@@ -979,7 +1078,24 @@ export default function LandingSettingsPage() {
                   </div>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="px-6 pb-6">
+              <AccordionContent className="px-6 pb-6 space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">섹션 제목</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <Input
+                      {...register('impactTitle')}
+                      placeholder="실제로 경험하는 변화"
+                      className="max-w-lg"
+                    />
+                    <Input
+                      {...register('impactSubtitle')}
+                      placeholder="베타 테스터들이 경험한 구체적인 효과"
+                      className="max-w-lg"
+                    />
+                  </CardContent>
+                </Card>
                 <Controller
                   name="impacts"
                   control={control}
@@ -1084,6 +1200,24 @@ export default function LandingSettingsPage() {
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-6 pb-6">
+                <Card className="mb-6">
+                  <CardHeader>
+                    <CardTitle className="text-base">섹션 제목</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <Input
+                      {...register('testimonialTitle')}
+                      placeholder="베타 테스터들의 이야기"
+                      className="max-w-lg"
+                    />
+                    <Input
+                      {...register('testimonialSubtitle')}
+                      placeholder="먼저 경험한 컨설턴트들의 생생한 후기"
+                      className="max-w-lg"
+                    />
+                  </CardContent>
+                </Card>
+
                 <Card className="mb-6">
                   <CardHeader>
                     <CardTitle className="text-base">레이아웃 설정</CardTitle>
@@ -1274,7 +1408,25 @@ export default function LandingSettingsPage() {
                   </div>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="px-6 pb-6">
+              <AccordionContent className="px-6 pb-6 space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">섹션 제목</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <Input
+                      {...register('faqTitle')}
+                      placeholder="자주 묻는 질문"
+                      className="max-w-lg"
+                    />
+                    <Input
+                      {...register('faqSubtitle')}
+                      placeholder="궁금하신 점을 확인해보세요"
+                      className="max-w-lg"
+                    />
+                  </CardContent>
+                </Card>
+
                 <div className="flex justify-end mb-4">
                   <Button onClick={openAddFaqDialog} size="sm">
                     <Plus className="w-4 h-4 mr-2" />

@@ -29,6 +29,8 @@ interface SocialProofSectionProps {
   trustMetrics: TrustMetric[];
   layout?: 'grid' | 'slide';
   columns?: number;
+  sectionTitle?: string;
+  sectionSubtitle?: string;
 }
 
 function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
@@ -72,6 +74,8 @@ export const SocialProofSection: React.FC<SocialProofSectionProps> = ({
   trustMetrics,
   layout = 'grid',
   columns = 3,
+  sectionTitle,
+  sectionSubtitle,
 }) => {
   if (testimonials.length === 0) return null;
 
@@ -87,7 +91,7 @@ export const SocialProofSection: React.FC<SocialProofSectionProps> = ({
             viewport={{ once: true }}
             className="text-3xl lg:text-4xl font-bold text-[var(--text-primary)] mb-4"
           >
-            베타 테스터들의 이야기
+            {sectionTitle || '베타 테스터들의 이야기'}
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -96,7 +100,7 @@ export const SocialProofSection: React.FC<SocialProofSectionProps> = ({
             transition={{ delay: 0.1 }}
             className="text-lg text-[var(--text-secondary)] max-w-2xl mx-auto"
           >
-            먼저 경험한 컨설턴트들의 생생한 후기
+            {sectionSubtitle || '먼저 경험한 컨설턴트들의 생생한 후기'}
           </motion.p>
         </div>
 

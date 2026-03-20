@@ -13,9 +13,15 @@ interface SolutionItem {
 
 interface SolutionSectionProps {
   items?: SolutionItem[];
+  sectionTitle?: string;
+  sectionSubtitle?: string;
 }
 
-export const SolutionSection: React.FC<SolutionSectionProps> = ({ items }) => {
+export const SolutionSection: React.FC<SolutionSectionProps> = ({
+  items,
+  sectionTitle,
+  sectionSubtitle,
+}) => {
   const steps =
     items && items.length > 0
       ? items
@@ -41,7 +47,7 @@ export const SolutionSection: React.FC<SolutionSectionProps> = ({ items }) => {
             viewport={{ once: true }}
             className="text-3xl lg:text-4xl font-bold text-[var(--text-primary)] mb-4"
           >
-            이렇게 간단하게 해결됩니다
+            {sectionTitle || '이렇게 간단하게 해결됩니다'}
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -50,7 +56,7 @@ export const SolutionSection: React.FC<SolutionSectionProps> = ({ items }) => {
             transition={{ delay: 0.1 }}
             className="text-lg text-[var(--text-secondary)] max-w-2xl mx-auto"
           >
-            3단계로 완성되는 스마트한 고객 관리
+            {sectionSubtitle || '3단계로 완성되는 스마트한 고객 관리'}
           </motion.p>
         </div>
 

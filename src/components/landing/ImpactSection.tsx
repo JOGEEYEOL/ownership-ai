@@ -16,9 +16,15 @@ interface ImpactItem {
 
 interface ImpactSectionProps {
   items?: ImpactItem[];
+  sectionTitle?: string;
+  sectionSubtitle?: string;
 }
 
-export const ImpactSection: React.FC<ImpactSectionProps> = ({ items }) => {
+export const ImpactSection: React.FC<ImpactSectionProps> = ({
+  items,
+  sectionTitle,
+  sectionSubtitle,
+}) => {
   const impacts =
     items && items.length > 0
       ? items
@@ -55,7 +61,7 @@ export const ImpactSection: React.FC<ImpactSectionProps> = ({ items }) => {
             viewport={{ once: true }}
             className="text-3xl lg:text-4xl font-bold text-[var(--text-primary)] mb-4"
           >
-            실제로 경험하는 변화
+            {sectionTitle || '실제로 경험하는 변화'}
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -64,7 +70,7 @@ export const ImpactSection: React.FC<ImpactSectionProps> = ({ items }) => {
             transition={{ delay: 0.1 }}
             className="text-lg text-[var(--text-secondary)] max-w-2xl mx-auto"
           >
-            베타 테스터들이 경험한 구체적인 효과
+            {sectionSubtitle || '베타 테스터들이 경험한 구체적인 효과'}
           </motion.p>
         </div>
 

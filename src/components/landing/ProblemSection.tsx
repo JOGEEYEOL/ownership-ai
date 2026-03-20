@@ -14,9 +14,15 @@ interface ProblemItem {
 
 interface ProblemSectionProps {
   items?: ProblemItem[];
+  sectionTitle?: string;
+  sectionSubtitle?: string;
 }
 
-export const ProblemSection: React.FC<ProblemSectionProps> = ({ items }) => {
+export const ProblemSection: React.FC<ProblemSectionProps> = ({
+  items,
+  sectionTitle,
+  sectionSubtitle,
+}) => {
   const problems =
     items && items.length > 0
       ? items
@@ -48,7 +54,7 @@ export const ProblemSection: React.FC<ProblemSectionProps> = ({ items }) => {
             viewport={{ once: true }}
             className="text-3xl lg:text-4xl font-bold text-[var(--text-primary)] mb-4"
           >
-            이런 어려움을 겪고 계신가요?
+            {sectionTitle || '이런 어려움을 겪고 계신가요?'}
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -57,7 +63,7 @@ export const ProblemSection: React.FC<ProblemSectionProps> = ({ items }) => {
             transition={{ delay: 0.1 }}
             className="text-lg text-[var(--text-secondary)] max-w-2xl mx-auto"
           >
-            1인 컨설턴트가 겪는 가장 큰 문제들
+            {sectionSubtitle || '1인 컨설턴트가 겪는 가장 큰 문제들'}
           </motion.p>
         </div>
 

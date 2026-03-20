@@ -13,9 +13,15 @@ interface FeatureItem {
 
 interface FeaturesSectionProps {
   items?: FeatureItem[];
+  sectionTitle?: string;
+  sectionSubtitle?: string;
 }
 
-export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ items }) => {
+export const FeaturesSection: React.FC<FeaturesSectionProps> = ({
+  items,
+  sectionTitle,
+  sectionSubtitle,
+}) => {
   const features =
     items && items.length > 0
       ? items
@@ -51,10 +57,10 @@ export const FeaturesSection: React.FC<FeaturesSectionProps> = ({ items }) => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl lg:text-4xl font-bold text-[var(--text-primary)] mb-4">
-            핵심 기능
+            {sectionTitle || '핵심 기능'}
           </h2>
           <p className="text-lg text-[var(--text-secondary)] max-w-2xl mx-auto">
-            컨설턴트가 정말 필요한 기능만 담았습니다
+            {sectionSubtitle || '컨설턴트가 정말 필요한 기능만 담았습니다'}
           </p>
         </div>
 

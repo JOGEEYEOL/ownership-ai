@@ -11,9 +11,11 @@ interface FAQItem {
 
 interface FAQSectionProps {
   faqs: FAQItem[];
+  sectionTitle?: string;
+  sectionSubtitle?: string;
 }
 
-export const FAQSection: React.FC<FAQSectionProps> = ({ faqs }) => {
+export const FAQSection: React.FC<FAQSectionProps> = ({ faqs, sectionTitle, sectionSubtitle }) => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   const toggleFAQ = (index: number) => {
@@ -32,7 +34,7 @@ export const FAQSection: React.FC<FAQSectionProps> = ({ faqs }) => {
             viewport={{ once: true }}
             className="text-3xl lg:text-4xl font-bold text-[var(--text-primary)] mb-4"
           >
-            자주 묻는 질문
+            {sectionTitle || '자주 묻는 질문'}
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -41,7 +43,7 @@ export const FAQSection: React.FC<FAQSectionProps> = ({ faqs }) => {
             transition={{ delay: 0.1 }}
             className="text-lg text-[var(--text-secondary)] max-w-2xl mx-auto"
           >
-            궁금하신 점을 확인해보세요
+            {sectionSubtitle || '궁금하신 점을 확인해보세요'}
           </motion.p>
         </div>
 
