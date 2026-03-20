@@ -101,17 +101,21 @@ export const SocialProofSection: React.FC<SocialProofSectionProps> = ({
         </div>
 
         {layout === 'slide' ? (
-          <div className="max-w-6xl mx-auto px-12">
+          <div className="max-w-6xl mx-auto">
             <Carousel opts={{ align: 'start', loop: true }} className="w-full">
-              <CarouselContent className="-ml-4">
+              <CarouselContent className="-ml-6">
                 {testimonials.map(testimonial => (
-                  <CarouselItem key={testimonial.name} className={`pl-4 ${slideBasisMap[cols]}`}>
-                    <TestimonialCard testimonial={testimonial} />
+                  <CarouselItem key={testimonial.name} className={`pl-6 ${slideBasisMap[cols]}`}>
+                    <div className="h-full">
+                      <TestimonialCard testimonial={testimonial} />
+                    </div>
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              <CarouselPrevious />
-              <CarouselNext />
+              <div className="flex justify-center gap-4 mt-8">
+                <CarouselPrevious className="static translate-x-0 translate-y-0" />
+                <CarouselNext className="static translate-x-0 translate-y-0" />
+              </div>
             </Carousel>
           </div>
         ) : (
