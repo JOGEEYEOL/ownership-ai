@@ -24,6 +24,8 @@ export default async function HomePage() {
         'landing_footer_company_name',
         'landing_footer_description',
         'landing_trust_metrics',
+        'landing_testimonial_layout',
+        'landing_testimonial_columns',
         'contact_phone',
         'contact_emails',
       ]),
@@ -74,7 +76,12 @@ export default async function HomePage() {
       <SolutionSection />
       <FeaturesSection />
       <ImpactSection />
-      <SocialProofSection testimonials={testimonialsRes.data || []} trustMetrics={trustMetrics} />
+      <SocialProofSection
+        testimonials={testimonialsRes.data || []}
+        trustMetrics={trustMetrics}
+        layout={(settingsMap.get('landing_testimonial_layout') as 'grid' | 'slide') || 'grid'}
+        columns={parseInt(settingsMap.get('landing_testimonial_columns') || '3', 10)}
+      />
       <FAQSection faqs={faqsRes.data || []} />
       {/* TODO: 메일링 시스템 도입 후 복원 */}
       {/* <FinalCTASection /> */}

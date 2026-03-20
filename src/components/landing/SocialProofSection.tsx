@@ -4,6 +4,13 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Quote } from 'lucide-react';
 import { Card } from '../common/Card';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel';
 
 interface Testimonial {
   name: string;
@@ -20,13 +27,55 @@ interface TrustMetric {
 interface SocialProofSectionProps {
   testimonials: Testimonial[];
   trustMetrics: TrustMetric[];
+  layout?: 'grid' | 'slide';
+  columns?: number;
 }
+
+function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
+  return (
+    <Card hover className="h-full p-8">
+      <Quote className="w-10 h-10 text-[var(--primary-blue)] opacity-20 mb-4" />
+      <p className="text-[var(--text-secondary)] leading-relaxed mb-6">{testimonial.content}</p>
+      <div className="flex items-center">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(testimonial.name)}&background=0052cc&color=fff`}
+          alt={testimonial.name}
+          className="w-12 h-12 rounded-full mr-4"
+          loading="lazy"
+        />
+        <div>
+          <div className="font-semibold text-[var(--text-primary)]">{testimonial.name}</div>
+          <div className="text-sm text-[var(--text-secondary)]">
+            {testimonial.role} · {testimonial.company}
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+const columnClassMap: Record<number, string> = {
+  2: 'grid-cols-1 lg:grid-cols-2',
+  3: 'grid-cols-1 lg:grid-cols-3',
+  4: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4',
+};
+
+const slideBasisMap: Record<number, string> = {
+  2: 'md:basis-1/2',
+  3: 'md:basis-1/2 lg:basis-1/3',
+  4: 'md:basis-1/2 lg:basis-1/4',
+};
 
 export const SocialProofSection: React.FC<SocialProofSectionProps> = ({
   testimonials,
   trustMetrics,
+  layout = 'grid',
+  columns = 3,
 }) => {
   if (testimonials.length === 0) return null;
+
+  const cols = [2, 3, 4].includes(columns) ? columns : 3;
 
   return (
     <section className="py-20 bg-[var(--bg-gray-50)]">
@@ -51,46 +100,35 @@ export const SocialProofSection: React.FC<SocialProofSectionProps> = ({
           </motion.p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {testimonials.map((testimonial, index) => (
-            <motion.div
-              key={testimonial.name}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.15 }}
-            >
-              <Card hover className="h-full p-8">
-                {/* Quote Icon */}
-                <Quote className="w-10 h-10 text-[var(--primary-blue)] opacity-20 mb-4" />
-
-                {/* Testimonial Content */}
-                <p className="text-[var(--text-secondary)] leading-relaxed mb-6">
-                  {testimonial.content}
-                </p>
-
-                {/* Author */}
-                <div className="flex items-center">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(testimonial.name)}&background=0052cc&color=fff`}
-                    alt={testimonial.name}
-                    className="w-12 h-12 rounded-full mr-4"
-                    loading="lazy"
-                  />
-                  <div>
-                    <div className="font-semibold text-[var(--text-primary)]">
-                      {testimonial.name}
-                    </div>
-                    <div className="text-sm text-[var(--text-secondary)]">
-                      {testimonial.role} · {testimonial.company}
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
+        {layout === 'slide' ? (
+          <div className="max-w-6xl mx-auto px-12">
+            <Carousel opts={{ align: 'start', loop: true }} className="w-full">
+              <CarouselContent className="-ml-4">
+                {testimonials.map(testimonial => (
+                  <CarouselItem key={testimonial.name} className={`pl-4 ${slideBasisMap[cols]}`}>
+                    <TestimonialCard testimonial={testimonial} />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
+          </div>
+        ) : (
+          <div className={`grid ${columnClassMap[cols]} gap-8 max-w-6xl mx-auto`}>
+            {testimonials.map((testimonial, index) => (
+              <motion.div
+                key={testimonial.name}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.15 }}
+              >
+                <TestimonialCard testimonial={testimonial} />
+              </motion.div>
+            ))}
+          </div>
+        )}
 
         {/* Trust Indicators */}
         {trustMetrics.length > 0 && (

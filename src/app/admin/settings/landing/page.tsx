@@ -51,6 +51,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { SimpleRichTextEditor } from '@/components/editor/SimpleRichTextEditor';
 
 // ─── Types ───────────────────────────────────────
@@ -94,6 +101,8 @@ const settingsSchema = z.object({
   heroBadge: z.string(),
   authAppName: z.string(),
   authAppTagline: z.string(),
+  testimonialLayout: z.enum(['grid', 'slide']),
+  testimonialColumns: z.string(),
   footerCompanyName: z.string(),
   footerDescription: z.string(),
   privacyPolicy: z.string(),
@@ -135,6 +144,8 @@ export default function LandingSettingsPage() {
       heroBadge: '',
       authAppName: '',
       authAppTagline: '',
+      testimonialLayout: 'grid' as const,
+      testimonialColumns: '3',
       footerCompanyName: '',
       footerDescription: '',
       privacyPolicy: '',
@@ -171,6 +182,10 @@ export default function LandingSettingsPage() {
             heroBadge: map.get('landing_hero_badge') || '',
             authAppName: map.get('auth_app_name') || '',
             authAppTagline: map.get('auth_app_tagline') || '',
+            testimonialLayout: (map.get('landing_testimonial_layout') || 'grid') as
+              | 'grid'
+              | 'slide',
+            testimonialColumns: map.get('landing_testimonial_columns') || '3',
             footerCompanyName: map.get('landing_footer_company_name') || '',
             footerDescription: map.get('landing_footer_description') || '',
             privacyPolicy: map.get('legal_privacy_policy') || '',
@@ -204,6 +219,8 @@ export default function LandingSettingsPage() {
         { key: 'landing_hero_badge', value: formData.heroBadge },
         { key: 'auth_app_name', value: formData.authAppName },
         { key: 'auth_app_tagline', value: formData.authAppTagline },
+        { key: 'landing_testimonial_layout', value: formData.testimonialLayout },
+        { key: 'landing_testimonial_columns', value: formData.testimonialColumns },
         { key: 'landing_footer_company_name', value: formData.footerCompanyName },
         { key: 'landing_footer_description', value: formData.footerDescription },
         { key: 'legal_privacy_policy', value: formData.privacyPolicy },
@@ -782,6 +799,52 @@ export default function LandingSettingsPage() {
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-6 pb-6">
+                <Card className="mb-6">
+                  <CardHeader>
+                    <CardTitle className="text-base">레이아웃 설정</CardTitle>
+                    <CardDescription>후기 섹션의 표시 방식을 설정합니다.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex gap-4">
+                    <div className="flex-1">
+                      <Label className="text-xs text-gray-500">표시 방식</Label>
+                      <Controller
+                        name="testimonialLayout"
+                        control={control}
+                        render={({ field }) => (
+                          <Select value={field.value} onValueChange={field.onChange}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="grid">그리드 (정적)</SelectItem>
+                              <SelectItem value="slide">슬라이드</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        )}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <Label className="text-xs text-gray-500">한 줄 표시 개수</Label>
+                      <Controller
+                        name="testimonialColumns"
+                        control={control}
+                        render={({ field }) => (
+                          <Select value={field.value} onValueChange={field.onChange}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="2">2개</SelectItem>
+                              <SelectItem value="3">3개</SelectItem>
+                              <SelectItem value="4">4개</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        )}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
                 <div className="flex justify-end mb-4">
                   <Button onClick={openAddTestimonialDialog} size="sm">
                     <Plus className="w-4 h-4 mr-2" />
