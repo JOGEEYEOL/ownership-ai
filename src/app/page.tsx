@@ -26,6 +26,8 @@ export default async function HomePage() {
         'landing_trust_metrics',
         'landing_testimonial_layout',
         'landing_testimonial_columns',
+        'landing_testimonial_autoplay',
+        'landing_testimonial_duration',
         'landing_problem_title',
         'landing_problem_subtitle',
         'landing_problems',
@@ -136,6 +138,8 @@ export default async function HomePage() {
         trustMetrics={trustMetrics}
         layout={(settingsMap.get('landing_testimonial_layout') as 'grid' | 'slide') || 'grid'}
         columns={parseInt(settingsMap.get('landing_testimonial_columns') || '3', 10)}
+        autoplay={settingsMap.get('landing_testimonial_autoplay') === 'true'}
+        duration={parseInt(settingsMap.get('landing_testimonial_duration') || '5000', 10)}
         sectionTitle={settingsMap.get('landing_testimonial_title')}
         sectionSubtitle={settingsMap.get('landing_testimonial_subtitle')}
       />

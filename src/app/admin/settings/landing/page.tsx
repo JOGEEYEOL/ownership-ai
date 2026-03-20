@@ -135,6 +135,8 @@ const settingsSchema = z.object({
   authAppTagline: z.string(),
   testimonialLayout: z.enum(['grid', 'slide']),
   testimonialColumns: z.string(),
+  testimonialAutoplay: z.boolean(),
+  testimonialDuration: z.string(),
   faqTitle: z.string(),
   faqSubtitle: z.string(),
   footerCompanyName: z.string(),
@@ -194,6 +196,8 @@ export default function LandingSettingsPage() {
       authAppTagline: '',
       testimonialLayout: 'grid' as const,
       testimonialColumns: '3',
+      testimonialAutoplay: false,
+      testimonialDuration: '5000',
       faqTitle: '',
       faqSubtitle: '',
       footerCompanyName: '',
@@ -268,6 +272,8 @@ export default function LandingSettingsPage() {
               | 'grid'
               | 'slide',
             testimonialColumns: map.get('landing_testimonial_columns') || '3',
+            testimonialAutoplay: map.get('landing_testimonial_autoplay') === 'true',
+            testimonialDuration: map.get('landing_testimonial_duration') || '5000',
             faqTitle: map.get('landing_faq_title') || '',
             faqSubtitle: map.get('landing_faq_subtitle') || '',
             footerCompanyName: map.get('landing_footer_company_name') || '',
@@ -322,6 +328,8 @@ export default function LandingSettingsPage() {
         { key: 'auth_app_tagline', value: formData.authAppTagline },
         { key: 'landing_testimonial_layout', value: formData.testimonialLayout },
         { key: 'landing_testimonial_columns', value: formData.testimonialColumns },
+        { key: 'landing_testimonial_autoplay', value: String(formData.testimonialAutoplay) },
+        { key: 'landing_testimonial_duration', value: formData.testimonialDuration },
         { key: 'landing_faq_title', value: formData.faqTitle },
         { key: 'landing_faq_subtitle', value: formData.faqSubtitle },
         { key: 'landing_footer_company_name', value: formData.footerCompanyName },
@@ -1316,6 +1324,40 @@ export default function LandingSettingsPage() {
                           </Select>
                         )}
                       />
+                    </div>
+                  </CardContent>
+                  <CardContent className="border-t pt-4">
+                    <div className="flex items-center gap-6">
+                      <div className="flex items-center gap-3">
+                        <Controller
+                          name="testimonialAutoplay"
+                          control={control}
+                          render={({ field }) => (
+                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                          )}
+                        />
+                        <Label className="text-sm">자동 재생</Label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Label className="text-xs text-gray-500 whitespace-nowrap">전환 간격</Label>
+                        <Controller
+                          name="testimonialDuration"
+                          control={control}
+                          render={({ field }) => (
+                            <Select value={field.value} onValueChange={field.onChange}>
+                              <SelectTrigger className="w-28">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="3000">3초</SelectItem>
+                                <SelectItem value="5000">5초</SelectItem>
+                                <SelectItem value="7000">7초</SelectItem>
+                                <SelectItem value="10000">10초</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          )}
+                        />
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

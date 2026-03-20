@@ -11,6 +11,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
+import Autoplay from 'embla-carousel-autoplay';
 
 interface Testimonial {
   name: string;
@@ -29,6 +30,8 @@ interface SocialProofSectionProps {
   trustMetrics: TrustMetric[];
   layout?: 'grid' | 'slide';
   columns?: number;
+  autoplay?: boolean;
+  duration?: number;
   sectionTitle?: string;
   sectionSubtitle?: string;
 }
@@ -74,6 +77,8 @@ export const SocialProofSection: React.FC<SocialProofSectionProps> = ({
   trustMetrics,
   layout = 'grid',
   columns = 3,
+  autoplay = false,
+  duration = 5000,
   sectionTitle,
   sectionSubtitle,
 }) => {
@@ -106,7 +111,15 @@ export const SocialProofSection: React.FC<SocialProofSectionProps> = ({
 
         {layout === 'slide' ? (
           <div className="max-w-6xl mx-auto overflow-hidden">
-            <Carousel opts={{ align: 'start', loop: true, slidesToScroll: 1 }} className="w-full">
+            <Carousel
+              opts={{ align: 'start', loop: true, slidesToScroll: 1 }}
+              plugins={
+                autoplay
+                  ? [Autoplay({ delay: duration, stopOnInteraction: true, stopOnMouseEnter: true })]
+                  : []
+              }
+              className="w-full"
+            >
               <CarouselContent className="-ml-6">
                 {testimonials.map(testimonial => (
                   <CarouselItem
