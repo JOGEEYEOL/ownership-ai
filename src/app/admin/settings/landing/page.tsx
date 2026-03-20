@@ -15,7 +15,6 @@ import {
   Sparkles,
   MessageSquareText,
   Users,
-  BarChart3,
   FileText,
   Globe,
   Search,
@@ -624,94 +623,6 @@ export default function LandingSettingsPage() {
             </AccordionItem>
           </div>
 
-          {/* ─── 신뢰 지표 ─────────────────── */}
-          <div className="border rounded-lg bg-white overflow-hidden">
-            <AccordionItem value="trust" className="border-0">
-              <AccordionTrigger className="px-6 py-4 hover:no-underline">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gray-100 rounded-lg">
-                    <BarChart3 className="w-5 h-5 text-gray-500" />
-                  </div>
-                  <div className="text-left">
-                    <h2 className="text-lg font-semibold text-gray-900">신뢰 지표</h2>
-                    <p className="text-sm text-gray-500 font-normal">
-                      후기 섹션 하단의 수치 지표를 관리합니다.
-                    </p>
-                  </div>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-6 pb-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">지표 목록</CardTitle>
-                    <CardDescription>
-                      수치와 라벨을 입력하세요. (예: 100+ / 베타 테스터)
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Controller
-                      name="trustMetrics"
-                      control={control}
-                      render={({ field }) => (
-                        <div className="space-y-3">
-                          {field.value.map((metric, index) => (
-                            <div key={index} className="flex items-center gap-2">
-                              <Input
-                                value={metric.value}
-                                onChange={e => {
-                                  const updated = [...field.value];
-                                  updated[index] = { ...updated[index], value: e.target.value };
-                                  field.onChange(updated);
-                                }}
-                                placeholder="100+"
-                                className="w-32"
-                              />
-                              <Input
-                                value={metric.label}
-                                onChange={e => {
-                                  const updated = [...field.value];
-                                  updated[index] = { ...updated[index], label: e.target.value };
-                                  field.onChange(updated);
-                                }}
-                                placeholder="베타 테스터"
-                                className="flex-1"
-                              />
-                              {field.value.length > 1 && (
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => {
-                                    const updated = field.value.filter((_, i) => i !== index);
-                                    field.onChange(updated);
-                                  }}
-                                  className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              )}
-                            </div>
-                          ))}
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              field.onChange([...field.value, { value: '', label: '' }])
-                            }
-                          >
-                            <Plus className="w-4 h-4 mr-2" />
-                            지표 추가
-                          </Button>
-                        </div>
-                      )}
-                    />
-                  </CardContent>
-                </Card>
-              </AccordionContent>
-            </AccordionItem>
-          </div>
-
           {/* ─── FAQ 관리 ──────────────────── */}
           <div className="border rounded-lg bg-white overflow-hidden">
             <AccordionItem value="faq" className="border-0">
@@ -842,6 +753,74 @@ export default function LandingSettingsPage() {
                         )}
                       />
                     </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="mb-6">
+                  <CardHeader>
+                    <CardTitle className="text-base">신뢰 지표</CardTitle>
+                    <CardDescription>
+                      후기 섹션 하단에 표시되는 수치 지표입니다. (예: 100+ / 베타 테스터)
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Controller
+                      name="trustMetrics"
+                      control={control}
+                      render={({ field }) => (
+                        <div className="space-y-3">
+                          {field.value.map((metric, index) => (
+                            <div key={index} className="flex items-center gap-2">
+                              <Input
+                                value={metric.value}
+                                onChange={e => {
+                                  const updated = [...field.value];
+                                  updated[index] = { ...updated[index], value: e.target.value };
+                                  field.onChange(updated);
+                                }}
+                                placeholder="100+"
+                                className="w-32"
+                              />
+                              <Input
+                                value={metric.label}
+                                onChange={e => {
+                                  const updated = [...field.value];
+                                  updated[index] = { ...updated[index], label: e.target.value };
+                                  field.onChange(updated);
+                                }}
+                                placeholder="베타 테스터"
+                                className="flex-1"
+                              />
+                              {field.value.length > 1 && (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => {
+                                    const updated = field.value.filter((_, i) => i !== index);
+                                    field.onChange(updated);
+                                  }}
+                                  className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              )}
+                            </div>
+                          ))}
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              field.onChange([...field.value, { value: '', label: '' }])
+                            }
+                          >
+                            <Plus className="w-4 h-4 mr-2" />
+                            지표 추가
+                          </Button>
+                        </div>
+                      )}
+                    />
                   </CardContent>
                 </Card>
 
