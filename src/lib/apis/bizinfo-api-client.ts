@@ -305,9 +305,17 @@ export class BizinfoAPIClient implements IProgramAPIClient {
   parseSourceUrl(raw: RawProgramData): string | null {
     const data = raw as BizinfoProgramData;
 
-    // 기업마당은 상대 경로로 제공하므로 base URL 추가
     if (data.pblancUrl && typeof data.pblancUrl === 'string') {
-      return `https://www.bizinfo.go.kr${data.pblancUrl}`;
+      const url = data.pblancUrl.trim();
+      if (!url) {
+        return null;
+      }
+
+      // 2026-03-13부터 API가 절대 URL로 응답 형식을 변경했음. 둘 다 처리.
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        return url;
+      }
+      return `https://www.bizinfo.go.kr${url}`;
     }
 
     return null;
